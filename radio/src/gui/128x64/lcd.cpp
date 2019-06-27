@@ -557,10 +557,10 @@ void lcdDrawVerticalLine(coord_t x, coord_t y, coord_t h, uint8_t pat, LcdFlags 
   y = (y & 0x07);
   if (y) {
     ASSERT_IN_DISPLAY(p);
-    uint8_t msk = ~(BITMASK(y)-1);
+    uint8_t msk = ~(bfBitmask<uint8_t>(y));
     h -= 8-y;
     if (h < 0)
-      msk -= ~(BITMASK(8+h)-1);
+      msk -= ~(bfBitmask<uint8_t>(8 + h));
     lcdMaskPoint(p, msk & pat, att);
     p += LCD_W;
   }
@@ -572,7 +572,7 @@ void lcdDrawVerticalLine(coord_t x, coord_t y, coord_t h, uint8_t pat, LcdFlags 
   }
   if (h > 0) {
     ASSERT_IN_DISPLAY(p);
-    lcdMaskPoint(p, (BITMASK(h)-1) & pat, att);
+    lcdMaskPoint(p, (bfBitmask<uint8_t>(h)) & pat, att);
   }
 }
 
@@ -802,32 +802,19 @@ void drawCurveName(coord_t x, coord_t y, int8_t idx, LcdFlags att)
   lcdDrawText(x, y, s, att);
 }
 
+#warning "This function needs to be reworked"
 void drawTimerMode(coord_t x, coord_t y, swsrc_t mode, LcdFlags att)
 {
   if (mode >= 0) {
-    if (mode < TMRMODE_COUNT)
-      return lcdDrawTextAtIndex(x, y, STR_VTMRMODES, mode, att);
-    else
-      mode -= (TMRMODE_COUNT-1);
+//    if (mode < TMRMODE_COUNT)
+//      return lcdDrawTextAtIndex(x, y, STR_VTMRMODES, mode, att);
+//    else
+//      mode -= (TMRMODE_COUNT-1);
   }
   drawSwitch(x, y, mode, att);
 }
 
-void drawTrimMode(coord_t x, coord_t y, uint8_t fm, uint8_t idx, LcdFlags att)
-{
-  trim_t v = getRawTrimValue(fm, idx);
-  uint8_t mode = v.mode;
-  uint8_t p = mode >> 1;
-  char s[] = "--";
-  if (mode != TRIM_MODE_NONE) {
-    if (mode % 2 == 0)
-      s[0] = ':';
-    else
-      s[0] = '+';
-    s[1] = '0'+p;
-  }
-  lcdDrawText(x, y, s, att);
-}
+
 void drawShortTrimMode(coord_t x, coord_t y, uint8_t fm, uint8_t idx, LcdFlags att)
 {
   trim_t v = getRawTrimValue(fm, idx);
@@ -838,15 +825,6 @@ void drawShortTrimMode(coord_t x, coord_t y, uint8_t fm, uint8_t idx, LcdFlags a
   }
   else {
     lcdDrawChar(x, y, '0'+p, att);
-  }
-}
-
-void drawValueWithUnit(coord_t x, coord_t y, int val, uint8_t unit, LcdFlags att)
-{
-  // convertUnit(val, unit);
-  lcdDrawNumber(x, y, val, att & (~NO_UNIT));
-  if (!(att & NO_UNIT) && unit != UNIT_RAW) {
-    lcdDrawTextAtIndex(lcdLastRightPos/*+1*/, y, STR_VTELEMUNIT, unit, 0);
   }
 }
 
@@ -977,7 +955,7 @@ void lcdDrawPoint(coord_t x, coord_t y, LcdFlags att)
 {
   uint8_t * p = &displayBuf[ y / 8 * LCD_W + x ];
   if (p < DISPLAY_END) {
-    lcdMaskPoint(p, BITMASK(y % 8), att);
+    lcdMaskPoint(p, bfBit<uint8_t>(y % 8), att);
   }
 }
 
@@ -999,7 +977,7 @@ void lcdDrawHorizontalLine(coord_t x, coord_t y, coord_t w, uint8_t pat, LcdFlag
   if (x+w > LCD_W) { w = LCD_W - x; }
 
   uint8_t *p  = &displayBuf[ y / 8 * LCD_W + x ];
-  uint8_t msk = BITMASK(y%8);
+  uint8_t msk = bfBit<uint8_t>(y % 8);
   while (w--) {
     if(pat&1) {
       lcdMaskPoint(p, msk, att);

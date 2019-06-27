@@ -69,15 +69,18 @@ void saveTimers()
 
 #define THR_TRG_TRESHOLD    13      // approximately 10% full throttle
 
+#warning "Timer mode is switched into (mode + swtch), needs to be taken into account in UI"
+
 void evalTimers(int16_t throttle, uint8_t tick10ms)
 {
   for (uint8_t i=0; i<TIMERS; i++) {
     tmrmode_t timerMode = g_model.timers[i].mode;
+    int16_t timerSwtch = g_model.timers[i].swtch;
     tmrstart_t timerStart = g_model.timers[i].start;
     TimerState * timerState = &timersStates[i];
 
-    if (timerMode) {
-      if ((timerState->state == TMR_OFF) && (timerMode != TMRMODE_THR_TRG)) {
+    if (timerSwtch && getSwitch(timerSwtch)) {
+      if (timerState->state == TMR_OFF) {
         timerState->state = TMR_RUNNING;
         timerState->cnt = 0;
         timerState->sum = 0;
@@ -96,7 +99,7 @@ void evalTimers(int16_t throttle, uint8_t tick10ms)
         tmrval_t newTimerVal = timerState->val;
         if (timerStart) newTimerVal = timerStart - newTimerVal;
 
-        if (timerMode == TMRMODE_ABS) {
+        if (timerMode == TMRMODE_SIMPLE) {
           newTimerVal++;
         }
         else if (timerMode == TMRMODE_THR) {
@@ -109,7 +112,7 @@ void evalTimers(int16_t throttle, uint8_t tick10ms)
           }
           timerState->cnt = 0;
         }
-        else if (timerMode == TMRMODE_THR_TRG) {
+        else if (timerMode == TMRMODE_THR_TRIGGER) {
           // we can't rely on (throttle || newTimerVal > 0) as a detection if timer should be running
           // because having persistent timer brakes this rule
           if ((throttle > THR_TRG_TRESHOLD) && timerState->state == TMR_OFF) {
@@ -121,10 +124,8 @@ void evalTimers(int16_t throttle, uint8_t tick10ms)
           if (timerState->state != TMR_OFF) newTimerVal++;
         }
         else {
-          if (timerMode > 0) timerMode -= (TMRMODE_COUNT-1);
-          if (getSwitch(timerMode)) {
-            newTimerVal++;
-          }
+          if (timerMode > 0)
+            timerMode -= TMRMODE_MAX;
         }
 
         switch (timerState->state) {

@@ -409,24 +409,25 @@ void menuModelSetup(event_t event)
           switch (menuHorizontalPosition) {
             case 0:
             {
-              swsrc_t timerMode = timer->mode;
-              if (timerMode < 0)
-                timerMode -= TMRMODE_COUNT-1;
-              CHECK_INCDEC_MODELVAR_CHECK(event, timerMode, -TMRMODE_COUNT-SWSRC_LAST+1, TMRMODE_COUNT+SWSRC_LAST-1, isSwitchAvailableInTimers);
-              if (timerMode < 0)
-                timerMode += TMRMODE_COUNT-1;
-              timer->mode = timerMode;
-#if defined(AUTOSWITCH)
-              if (s_editMode>0) {
-                int8_t val = timer->mode - (TMRMODE_COUNT-1);
-                int8_t switchVal = checkIncDecMovedSwitch(val);
-                if (val != switchVal) {
-                  timer->mode = switchVal + (TMRMODE_COUNT-1);
-                  storageDirty(EE_MODEL);
-                }
-              }
-#endif
-              break;
+#warning "This function needs to be reworked"
+//              swsrc_t timerMode = timer->mode;
+//              if (timerMode < 0)
+//                timerMode -= TMRMODE_COUNT-1;
+//              CHECK_INCDEC_MODELVAR_CHECK(event, timerMode, -TMRMODE_COUNT-SWSRC_LAST+1, TMRMODE_COUNT+SWSRC_LAST-1, isSwitchAvailableInTimers);
+//              if (timerMode < 0)
+//                timerMode += TMRMODE_COUNT-1;
+//              timer->mode = timerMode;
+//#if defined(AUTOSWITCH)
+//              if (s_editMode>0) {
+//                int8_t val = timer->mode - (TMRMODE_COUNT-1);
+//                int8_t switchVal = checkIncDecMovedSwitch(val);
+//                if (val != switchVal) {
+//                  timer->mode = switchVal + (TMRMODE_COUNT-1);
+//                  storageDirty(EE_MODEL);
+//                }
+//              }
+//#endif
+               break;
             }
             case 1:
               CHECK_INCDEC_MODELVAR_ZERO(event, qr.quot, 539); // 8:59

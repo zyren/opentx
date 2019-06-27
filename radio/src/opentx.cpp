@@ -21,6 +21,12 @@
 #include <io/frsky_firmware_update.h>
 #include "opentx.h"
 
+#if defined(LIBOPENUI)
+// #include "shutdown_animation.h"
+// #include "radio_calibration.h"
+#include "view_main.h"
+#endif
+
 RadioData  g_eeGeneral;
 ModelData  g_model;
 
@@ -119,7 +125,11 @@ void per10ms()
 #if defined(GUI)
   if (lightOffCounter) lightOffCounter--;
   if (flashCounter) flashCounter--;
+#if defined(LIBOPENUI)
+  #warning "TODO remove noHighlightCounter on LIBOPENUI"
+#else
   if (noHighlightCounter) noHighlightCounter--;
+#endif
 #endif
 
   if (trimsCheckTimer) trimsCheckTimer--;
@@ -525,17 +535,19 @@ void modelDefault(uint8_t id)
   g_model.header.name[6] = '\033' + id%10;
 #endif
 
-#if defined(PCBHORUS)
+
+#if defined(COLORLCD)
+  #warning "Initialization missing"
   extern const LayoutFactory * defaultLayout;
-  delete customScreens[0];
-  customScreens[0] = defaultLayout->create(&g_model.screenData[0].layoutData);
-  strcpy(g_model.screenData[0].layoutName, "Layout2P1");
-  extern const WidgetFactory * defaultWidget;
-  customScreens[0]->createWidget(0, defaultWidget);
-  // enable switch warnings
-  for (int i=0; i<NUM_SWITCHES; i++) {
-    g_model.switchWarningState |= (1 << (3*i));
-  }
+//  delete customScreens[0];
+//  customScreens[0] = defaultLayout->create(&g_model.screenData[0].layoutData);
+//  strcpy(g_model.screenData[0].layoutName, "Layout2P1");
+//  extern const WidgetFactory * defaultWidget;
+//  customScreens[0]->createWidget(0, defaultWidget);
+//  // enable switch warnings
+//  for (int i=0; i<NUM_SWITCHES; i++) {
+//    g_model.switchWarningState |= (1 << (3*i));
+//  }
 #endif
 }
 
@@ -777,7 +789,8 @@ void doSplash()
 
       getADC();
 
-      if (keyDown() || inputsMoved()) return;
+      if (getEvent() || inputsMoved())
+        return;
 
 #if defined(PWR_BUTTON_PRESS)
       uint32_t pwr_check = pwrCheck();
@@ -863,7 +876,7 @@ static void checkRTCBattery()
 }
 #endif
 
-#if defined(PCBTARANIS) || defined(PCBHORUS)
+#if defined(PCBFRSKY) || defined(PCBFLYSKY)
 void checkFailsafe()
 {
   for (int i=0; i<NUM_MODULES; i++) {
@@ -910,9 +923,13 @@ void checkAll()
   checkRTCBattery();
 #endif
 
+#if defined(COLORLCD)
+#warning "Model notes missing"
+#else
   if (g_model.displayChecklist && modelHasNotes()) {
     readModelNotes();
   }
+#endif
 
   if (!waitKeysReleased()) {
     showMessageBox(STR_KEYSTUCK);
@@ -1033,7 +1050,7 @@ void alert(const char * title, const char * msg , uint8_t sound)
   while (1) {
     RTOS_WAIT_MS(10);
 
-    if (keyDown())  // wait for key release
+    if (getEvent())  // wait for key release
       break;
 
     doLoopCommonActions();
@@ -1218,7 +1235,16 @@ void getADC()
   DEBUG_TIMER_STOP(debugTimerAdcRead);
 
   for (uint8_t x=0; x<NUM_ANALOGS; x++) {
-    uint16_t v = getAnalogValue(x) >> (1 - ANALOG_SCALE);
+    uint16_t v;
+
+#if defined(FLYSKY_HALL_STICKS)
+    if (x < 4)
+      v = get_hall_adc_value(x) >> (1 - ANALOG_SCALE);
+    else
+      v = getAnalogValue(x) >> (1 - ANALOG_SCALE);
+#else
+    v = getAnalogValue(x) >> (1 - ANALOG_SCALE);
+#endif
 
     // Jitter filter:
     //    * pass trough any big change directly
@@ -1555,7 +1581,12 @@ void opentxStart(const uint8_t startOptions = OPENTX_START_DEFAULT_ARGS)
 
 #if defined(GUI)
   if (calibration_needed) {
+#if defined(LIBOPENUI)
+    #warning "TODO add a startCalibration function"
+    // startCalibration();
+#else
     chainMenu(menuFirstCalib);
+#endif
   }
   else if (!(startOptions & OPENTX_START_NO_CHECKS)) {
     checkAlarm();
@@ -1625,14 +1656,16 @@ void opentxResume()
 {
   TRACE("opentxResume");
 
+#if !defined(LIBOPENUI)
   menuHandlers[0] = menuMainView;
+#endif
 
   sdMount();
   storageReadAll();
 
 #if defined(COLORLCD)
+  #warning "TODO call loadTheme (not sure, it has been removed in some earlier commit)"
   loadTheme();
-  loadFontCache();
 #endif
 
   // removed to avoid the double warnings (throttle, switch, etc.)
@@ -1769,7 +1802,10 @@ void opentxInit()
 {
   TRACE("opentxInit");
 
-#if defined(GUI)
+#if defined(LIBOPENUI)
+  new ViewMain();
+#elif defined(GUI)
+  // TODO add a function for this (duplicated)
   menuHandlers[0] = menuMainView;
   #if MENUS_LOCK != 2/*no menus*/
     menuHandlers[1] = menuModelSelect;
@@ -1827,7 +1863,8 @@ void opentxInit()
 #pragma clang diagnostic push
 #pragma clang diagnostic warning "-Waddress-of-packed-member"
 #endif
-    topbar = new Topbar(&g_model.topbarData);
+    #warning "TODO add the topbar"
+    // TODO topbar = new Topbar(&g_model.topbarData);
 #if __clang__
 // Restore warnings
 #pragma clang diagnostic pop
@@ -1889,7 +1926,6 @@ void opentxInit()
 
 #if defined(COLORLCD)
   loadTheme();
-  loadFontCache();
 #endif
 
   if (g_eeGeneral.backlightMode != e_backlight_mode_off) {
@@ -1952,7 +1988,7 @@ int main()
   stackPaint();
 #endif
 
-#if defined(SPLASH) && (defined(PCBTARANIS) || defined(PCBHORUS))
+#if defined(SPLASH) && defined(PCBFRSKY)
   drawSplash();
 #endif
 

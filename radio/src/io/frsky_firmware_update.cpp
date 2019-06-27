@@ -99,7 +99,7 @@ void FrskyDeviceFirmwareUpdate::processFrame(const uint8_t * frame)
 void FrskyDeviceFirmwareUpdate::startup()
 {
   switch(module) {
-#if defined(INTMODULE_USART)
+#if defined(PCBFRSKY) && defined(INTMODULE_USART)
     case INTERNAL_MODULE:
       intmoduleSerialStart(INTMODULE_FLASH_BAUDRATE, true);
       break;
@@ -310,7 +310,7 @@ const char * FrskyDeviceFirmwareUpdate::sendReqVersion()
   return "Version request failed";
 }
 
-const char * FrskyDeviceFirmwareUpdate::uploadFile(const char * filename)
+const char * FrskyDeviceFirmwareUpdate::uploadFile(const char * filename, ProgressHandler progressHandler)
 {
   FIL file;
   uint32_t buffer[1024 / sizeof(uint32_t)];
@@ -348,7 +348,7 @@ const char * FrskyDeviceFirmwareUpdate::uploadFile(const char * filename)
 
   uint8_t index = 0;
   while (1) {
-    drawProgressScreen(getBasename(filename), STR_WRITING, file.fptr, file.obj.objsize);
+    progressHandler(getBasename(filename), STR_WRITING, file.fptr, file.obj.objsize);
 
     if (f_read(&file, buffer, 1024, &count) != FR_OK) {
       f_close(&file);
@@ -410,7 +410,7 @@ const char * FrskyDeviceFirmwareUpdate::uploadFile(const char * filename)
       state = SPORT_DATA_TRANSFER,
       sendFrame();
       if (i == 0) {
-        drawProgressScreen(getBasename(filename), STR_WRITING, file.fptr, file.obj.objsize);
+        progressHandler(getBasename(filename), STR_WRITING, file.fptr, file.obj.objsize);
       }
     }
 
@@ -434,7 +434,7 @@ const char * FrskyDeviceFirmwareUpdate::endTransfer()
   return nullptr;
 }
 
-const char * FrskyDeviceFirmwareUpdate::doFlashFirmware(const char * filename)
+const char * FrskyDeviceFirmwareUpdate::doFlashFirmware(const char * filename, ProgressHandler progressHandler)
 {
   const char * result;
 
@@ -442,7 +442,7 @@ const char * FrskyDeviceFirmwareUpdate::doFlashFirmware(const char * filename)
   if (module == INTERNAL_MODULE) {
     intmoduleSerialStart(38400, true);
     GPIO_SetBits(INTMODULE_BOOTCMD_GPIO, INTMODULE_BOOTCMD_GPIO_PIN);
-    result = uploadFile(filename);
+    result = uploadFile(filename, progressHandler);
     GPIO_ResetBits(INTMODULE_BOOTCMD_GPIO, INTMODULE_BOOTCMD_GPIO_PIN);
     return result;
   }
@@ -450,13 +450,13 @@ const char * FrskyDeviceFirmwareUpdate::doFlashFirmware(const char * filename)
 
   result = sendPowerOn();
   if (!result) result = sendReqVersion();
-  if (!result) result = uploadFile(filename);
+  if (!result) result = uploadFile(filename, progressHandler);
   if (!result) result = endTransfer();
 
   return result;
 }
 
-const char * FrskyDeviceFirmwareUpdate::flashFirmware(const char * filename)
+const char * FrskyDeviceFirmwareUpdate::flashFirmware(const char * filename, ProgressHandler progressHandler)
 {
   pausePulses();
 
@@ -470,7 +470,7 @@ const char * FrskyDeviceFirmwareUpdate::flashFirmware(const char * filename)
 
   SPORT_UPDATE_POWER_OFF();
 
-  drawProgressScreen(getBasename(filename), STR_DEVICE_RESET, 0, 0);
+  progressHandler(getBasename(filename), STR_DEVICE_RESET, 0, 0);
 
   /* wait 2s off */
   watchdogSuspend(2000);
@@ -478,7 +478,7 @@ const char * FrskyDeviceFirmwareUpdate::flashFirmware(const char * filename)
 
   startup();
 
-  const char * result = doFlashFirmware(filename);
+  const char * result = doFlashFirmware(filename, progressHandler);
 
   AUDIO_PLAY(AU_SPECIAL_SOUND_BEEP1 );
   BACKLIGHT_ENABLE();
@@ -667,7 +667,7 @@ const char * FrskyChipFirmwareUpdate::sendUpgradeData(uint32_t index, uint8_t * 
   return status == 0x00 ? nullptr : "Upgrade failed";
 }
 
-const char * FrskyChipFirmwareUpdate::doFlashFirmware(const char * filename)
+const char * FrskyChipFirmwareUpdate::doFlashFirmware(const char * filename, ProgressHandler progressHandler)
 {
   const char * result;
   FIL file;
@@ -689,7 +689,7 @@ const char * FrskyChipFirmwareUpdate::doFlashFirmware(const char * filename)
   }
 
   uint32_t packetsCount = (information->size + sizeof(buffer) - 1) / sizeof(buffer);
-  drawProgressScreen(getBasename(filename), STR_FLASH_WRITE, 0, packetsCount);
+  progressHandler(getBasename(filename), STR_FLASH_WRITE, 0, packetsCount);
 
   result = sendUpgradeCommand('A', packetsCount);
   if (result)
@@ -697,7 +697,7 @@ const char * FrskyChipFirmwareUpdate::doFlashFirmware(const char * filename)
 
   uint32_t index = 0;
   while (1) {
-    drawProgressScreen(getBasename(filename), STR_FLASH_WRITE, index, packetsCount);
+    progressHandler(getBasename(filename), STR_FLASH_WRITE, index, packetsCount);
     if (f_read(&file, buffer, sizeof(buffer), &count) != FR_OK) {
       f_close(&file);
       return "Error reading file";
@@ -714,9 +714,9 @@ const char * FrskyChipFirmwareUpdate::doFlashFirmware(const char * filename)
   return sendUpgradeCommand('E', packetsCount);
 }
 
-const char * FrskyChipFirmwareUpdate::flashFirmware(const char * filename, bool wait)
+const char * FrskyChipFirmwareUpdate::flashFirmware(const char * filename, ProgressHandler progressHandler, bool wait)
 {
-  drawProgressScreen(getBasename(filename), STR_DEVICE_RESET, 0, 0);
+  progressHandler(getBasename(filename), STR_DEVICE_RESET, 0, 0);
 
   pausePulses();
 
@@ -738,7 +738,7 @@ const char * FrskyChipFirmwareUpdate::flashFirmware(const char * filename, bool 
 
   telemetryInit(PROTOCOL_TELEMETRY_FRSKY_SPORT);
 
-  const char * result = doFlashFirmware(filename);
+  const char * result = doFlashFirmware(filename, progressHandler);
 
   AUDIO_PLAY(AU_SPECIAL_SOUND_BEEP1);
   BACKLIGHT_ENABLE();

@@ -24,6 +24,7 @@
 #include "gui_common.h"
 #include "menus.h"
 #include "popups.h"
+#include "common/stdlcd/draw_functions.h"
 
 #define MENUS_SCROLLBAR_WIDTH          0
 

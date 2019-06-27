@@ -573,12 +573,8 @@
 #endif
 #define INTMODULE_FLASH_BAUDRATE        38400
 #if defined(PCBX10) || PCBREV >= 13
-  #define INTMODULE_RCC_APB1Periph      RCC_APB1Periph_TIM2
+  #define INTMODULE_RCC_APB1Periph      0
   #define INTMODULE_RCC_APB2Periph      RCC_APB2Periph_USART1
-  #define INTMODULE_TIMER               TIM2
-  #define INTMODULE_TIMER_IRQn          TIM2_IRQn
-  #define INTMODULE_TIMER_IRQHandler    TIM2_IRQHandler
-  #define INTMODULE_TIMER_FREQ          (PERI1_FREQUENCY * TIMER_MULT_APB1)
 #else
   #define INTMODULE_RCC_APB1Periph      0
   #define INTMODULE_RCC_APB2Periph      (RCC_APB2Periph_TIM1 | RCC_APB2Periph_USART1)
