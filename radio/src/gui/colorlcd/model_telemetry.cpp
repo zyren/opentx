@@ -391,9 +391,8 @@ void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
   this->window = window;
 
   // RSSI
-  if (g_model.moduleData[INTERNAL_MODULE].rfProtocol == RF_PROTO_OFF &&
-      g_model.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_MULTIMODULE &&
-      g_model.moduleData[EXTERNAL_MODULE].getMultiProtocol(false) == MM_RF_PROTO_FS_AFHDS2A)
+  if (g_model.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_MULTIMODULE &&
+      g_model.moduleData[EXTERNAL_MODULE].getMultiProtocol(false) == MODULE_SUBTYPE_MULTI_FS_AFHDS2A)
     new Subtitle(window, grid.getLineSlot(), "RSNR");
   else
     new Subtitle(window, grid.getLineSlot(), "RSSI");
@@ -420,9 +419,9 @@ void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
   // Sensors
   grid.setLabelWidth(140);
   new Subtitle(window, grid.getLineSlot(), STR_TELEMETRY_SENSORS);
-  new StaticText(window, {SENSOR_COL2, grid.getWindowHeight() + 3, SENSOR_COL3 - SENSOR_COL2, lineHeight}, STR_VALUE, SMLSIZE | TEXT_DISABLE_COLOR);
+  new StaticText(window, {SENSOR_COL2, grid.getWindowHeight() + 3, SENSOR_COL3 - SENSOR_COL2, PAGE_LINE_HEIGHT}, STR_VALUE, SMLSIZE | TEXT_DISABLE_COLOR);
   if (!g_model.ignoreSensorIds && !IS_SPEKTRUM_PROTOCOL())
-    new StaticText(window, {SENSOR_COL3, grid.getWindowHeight() + 3, LCD_W - SENSOR_COL3, lineHeight}, STR_ID, SMLSIZE | TEXT_DISABLE_COLOR);
+    new StaticText(window, {SENSOR_COL3, grid.getWindowHeight() + 3, LCD_W - SENSOR_COL3, PAGE_LINE_HEIGHT}, STR_ID, SMLSIZE | TEXT_DISABLE_COLOR);
   grid.nextLine();
 
   for (uint8_t idx = 0; idx < MAX_TELEMETRY_SENSORS; idx++) {
@@ -513,8 +512,8 @@ void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
   grid.nextLine();
   new StaticText(window, grid.getLabelSlot(true), STR_SOURCE);
   auto choice = new SourceChoice(window, grid.getFieldSlot(), MIXSRC_NONE, MIXSRC_LAST_TELEM,
-                                 GET_DEFAULT(g_model.frsky.varioSource ? MIXSRC_FIRST_TELEM + 3 * (g_model.frsky.varioSource - 1) : MIXSRC_NONE),
-                                 SET_VALUE(g_model.frsky.varioSource, newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1));
+                                 GET_DEFAULT(g_model.varioData.source ? MIXSRC_FIRST_TELEM + 3 * (g_model.varioData.source - 1) : MIXSRC_NONE),
+                                 SET_VALUE(g_model.varioData.source, newValue == MIXSRC_NONE ? 0 : (newValue - MIXSRC_FIRST_TELEM) / 3 + 1));
   choice->setAvailableHandler([=](int16_t value) {
     if (value == MIXSRC_NONE)
       return true;
@@ -525,13 +524,13 @@ void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
   });
   grid.nextLine();
   new StaticText(window, grid.getLabelSlot(true), STR_RANGE);
-  new NumberEdit(window, grid.getFieldSlot(2, 0), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioMin, -10));
-  new NumberEdit(window, grid.getFieldSlot(2, 1), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioMax, 10));
+  new NumberEdit(window, grid.getFieldSlot(2, 0), -7, 7, GET_SET_WITH_OFFSET(g_model.varioData.min, -10));
+  new NumberEdit(window, grid.getFieldSlot(2, 1), -7, 7, GET_SET_WITH_OFFSET(g_model.varioData.max, 10));
   grid.nextLine();
   new StaticText(window, grid.getLabelSlot(true), STR_CENTER);
-  new NumberEdit(window, grid.getFieldSlot(3, 0), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioCenterMin, -5), PREC1);
-  new NumberEdit(window, grid.getFieldSlot(3, 1), -7, 7, GET_SET_WITH_OFFSET(g_model.frsky.varioCenterMax, 5), PREC1);
-  new Choice(window, grid.getFieldSlot(3, 2), STR_VVARIOCENTER, 0, 1, GET_SET_DEFAULT(g_model.frsky.varioCenterSilent));
+  new NumberEdit(window, grid.getFieldSlot(3, 0), -7, 7, GET_SET_WITH_OFFSET(g_model.varioData.min, -5), PREC1);
+  new NumberEdit(window, grid.getFieldSlot(3, 1), -7, 7, GET_SET_WITH_OFFSET(g_model.varioData.max, 5), PREC1);
+  new Choice(window, grid.getFieldSlot(3, 2), STR_VVARIOCENTER, 0, 1, GET_SET_DEFAULT(g_model.varioData.centerSilent));
   grid.nextLine();
 
   grid.nextLine();
