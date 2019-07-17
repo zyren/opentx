@@ -103,7 +103,6 @@ inline void lcdDrawSizedText(coord_t x, coord_t y, const char * s, uint8_t len, 
   lcd->drawSizedText(x, y, s, len, attr);
 }
 
-void lcdDrawHexNumber(coord_t x, coord_t y, uint32_t val, LcdFlags mode=0);
 void lcdDrawNumber(coord_t x, coord_t y, int32_t val, LcdFlags flags=0, uint8_t len=0, const char * prefix=NULL, const char * suffix=NULL);
 
 #if !defined(BOOT)

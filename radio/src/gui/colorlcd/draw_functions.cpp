@@ -613,11 +613,21 @@ void drawSourceCustomValue(BitmapBuffer * dc, coord_t x, coord_t y, source_t sou
   }
 }
 
-void drawValueWithUnit(BitmapBuffer * dc, coord_t x, coord_t y, int val, uint8_t unit, LcdFlags att)
+void drawValueWithUnit(BitmapBuffer * dc, coord_t x, coord_t y, int val, uint8_t unit, LcdFlags flags)
 {
   // convertUnit(val, unit);
-  drawNumber(dc, x, y, val, att & (~NO_UNIT));
-  if (!(att & NO_UNIT) && unit != UNIT_RAW) {
+  drawNumber(dc, x, y, val, flags & (~NO_UNIT));
+  if (!(flags & NO_UNIT) && unit != UNIT_RAW) {
     drawTextAtIndex(dc, lcdNextPos/*+1*/, y, STR_VTELEMUNIT, unit, 0);
+  }
+}
+
+void drawHexNumber(BitmapBuffer * dc, coord_t x, coord_t y, uint32_t val, LcdFlags flags)
+{
+  for (int i=12; i>=0; i-=4) {
+    char c = (val >> i) & 0xf;
+    c = c>9 ? c+'A'-10 : c+'0';
+    dc->drawSizedText(x, y, &c, 1, flags);
+    x = lcdNextPos;
   }
 }

@@ -74,24 +74,24 @@ class SensorButton : public Button {
         dc->drawSolidFilledRect(2, 2, rect.w - 4, rect.h - 4, WARNING_COLOR);
       }
 
-      lcdDrawNumber(2, 1, index + 1, LEFT, 0, NULL, ":");
+      drawNumber(dc, 2, 1, index + 1, LEFT, 0, NULL, ":");
 
       lcdDrawSizedText(SENSOR_COL1, line1, g_model.telemetrySensors[index].label, TELEM_LABEL_LEN, ZCHAR);
 
       if (telemetryItem.isAvailable()) {
         LcdFlags color = telemetryItem.isOld() ? ALARM_COLOR : TEXT_COLOR;
-        drawSensorCustomValue(SENSOR_COL2, line1, index, getValue(MIXSRC_FIRST_TELEM + 3 * index), LEFT | color);
+        drawSensorCustomValue(dc, SENSOR_COL2, line1, index, getValue(MIXSRC_FIRST_TELEM + 3 * index), LEFT | color);
       }
       else {
-        lcdDrawText(SENSOR_COL2, line1, "---", CURVE_COLOR);
+        dc->drawText(SENSOR_COL2, line1, "---", CURVE_COLOR);
       }
 
       TelemetrySensor * sensor = & g_model.telemetrySensors[index];
       if (IS_SPEKTRUM_PROTOCOL()) {
-        lcdDrawHexNumber(SENSOR_COL3, line1, sensor->id, LEFT);
+        drawHexNumber(dc, SENSOR_COL3, line1, sensor->id, LEFT);
       }
       else if (sensor->type == TELEM_TYPE_CUSTOM && !g_model.ignoreSensorIds) {
-        lcdDrawNumber(SENSOR_COL3, line1, sensor->instance, LEFT);
+        drawNumber(dc, SENSOR_COL3, line1, sensor->instance, LEFT);
       }
       drawSolidRect(dc, 0, 0, rect.w, rect.h, 2, hasFocus() ? SCROLLBOX_COLOR : CURVE_AXIS_COLOR);
     }
