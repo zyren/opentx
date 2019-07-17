@@ -103,7 +103,7 @@ class SensorButton : public Button {
 class SensorEditWindow : public Page {
   public:
     SensorEditWindow(uint8_t index) :
-      Page(),
+      Page(ICON_MODEL_TELEMETRY),
       index(index)
     {
       buildBody(&body);
@@ -129,7 +129,7 @@ class SensorEditWindow : public Page {
     void updateSensorOneWindow()
     {
       // Sensor variable part
-      GridLayout grid;
+      FormGridLayout grid;
       sensorOneWindow->clear();
       TelemetrySensor * sensor = &g_model.telemetrySensors[index];
 
@@ -162,7 +162,7 @@ class SensorEditWindow : public Page {
         new StaticText(sensorOneWindow, grid.getLabelSlot(), STR_ID);
         auto hex = new NumberEdit(sensorOneWindow, grid.getFieldSlot(2, 0), 0, 0xffff, GET_SET_DEFAULT(sensor->id));
         hex->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
-          lcdDrawHexNumber(2, 2, value, 0);
+          drawHexNumber(dc, 2, 2, value, 0);
         });
         new NumberEdit(sensorOneWindow, grid.getFieldSlot(2, 1), 0, 0xff, GET_SET_DEFAULT(sensor->instance));
         grid.nextLine();
@@ -318,7 +318,7 @@ class SensorEditWindow : public Page {
     void buildBody(Window * window)
     {
       // Sensor one
-      GridLayout grid;
+      FormGridLayout grid;
       grid.spacer(8);
 
       TelemetrySensor * sensor = &g_model.telemetrySensors[index];
@@ -384,7 +384,7 @@ void ModelTelemetryPage::editSensor(Window * window, uint8_t index)
 
 void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
 {
-  GridLayout grid;
+  FormGridLayout grid;
   grid.spacer(8);
   grid.setLabelWidth(180);
 
