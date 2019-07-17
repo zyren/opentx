@@ -38,7 +38,7 @@ set(GUI_SRC
   model_gvars.cpp
   model_logical_switches.cpp
   special_functions.cpp
-  #  model_telemetry.cpp
+  model_telemetry.cpp
   menu_radio.cpp
   radio_setup.cpp
   radio_sdmanager.cpp

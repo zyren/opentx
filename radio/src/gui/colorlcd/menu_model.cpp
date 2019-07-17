@@ -28,8 +28,8 @@
 #include "model_outputs.h"
 #include "model_curves.h"
 #include "model_logical_switches.h"
-//#include "special_functions.h"
-//#include "model_telemetry.h"
+#include "special_functions.h"
+#include "model_telemetry.h"
 
 ModelMenu::ModelMenu():
   TabsGroup(ICON_MODEL)
@@ -44,6 +44,6 @@ ModelMenu::ModelMenu():
   addTab(new ModelOutputsPage());
   addTab(new ModelCurvesPage());
   addTab(new ModelLogicalSwitchesPage());
-  // addTab(new SpecialFunctionsPage(g_model.customFn));
-  // addTab(new ModelTelemetryPage());
+  addTab(new SpecialFunctionsPage(g_model.customFn));
+  addTab(new ModelTelemetryPage());
 }
