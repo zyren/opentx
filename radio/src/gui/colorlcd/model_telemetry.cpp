@@ -363,9 +363,11 @@ void ModelTelemetryPage::checkEvents()
     lastKnownIndex = availableTelemetryIndex();
     rebuild(window);
   }
+
+  PageTab::checkEvents();
 }
 
-void ModelTelemetryPage::rebuild(Window * window, int8_t focusSensorIndex)
+void ModelTelemetryPage::rebuild(FormWindow * window, int8_t focusSensorIndex)
 {
   coord_t scrollPosition = window->getScrollPositionY();
   window->clear();
@@ -374,7 +376,7 @@ void ModelTelemetryPage::rebuild(Window * window, int8_t focusSensorIndex)
 }
 
 
-void ModelTelemetryPage::editSensor(Window * window, uint8_t index)
+void ModelTelemetryPage::editSensor(FormWindow * window, uint8_t index)
 {
   Window * editWindow = new SensorEditWindow(index);
   editWindow->setCloseHandler([=]() {
@@ -382,7 +384,7 @@ void ModelTelemetryPage::editSensor(Window * window, uint8_t index)
   });
 }
 
-void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
+void ModelTelemetryPage::build(FormWindow * window, int8_t focusSensorIndex)
 {
   FormGridLayout grid;
   grid.spacer(8);
@@ -403,6 +405,7 @@ void ModelTelemetryPage::build(Window * window, int8_t focusSensorIndex)
   edit->setDisplayHandler([](BitmapBuffer * dc, LcdFlags flags, int32_t value) {
     drawNumber(dc, 2, 2, g_model.rssiAlarms.getWarningRssi(), flags);
   });
+  window->setFirstField(edit);
   grid.nextLine();
 
   new StaticText(window, grid.getLabelSlot(true), STR_CRITICALALARM);

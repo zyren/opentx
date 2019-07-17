@@ -252,6 +252,8 @@ class LogicalSwitchButton : public Button {
         invalidate();
         active = !active;
       }
+
+      Button::checkEvents();
     }
 
     virtual void paint(BitmapBuffer * dc) override
@@ -333,44 +335,54 @@ void ModelLogicalSwitchesPage::editLogicalSwitch(FormWindow * window, uint8_t ls
 void ModelLogicalSwitchesPage::build(FormWindow * window, int8_t focusIndex)
 {
   FormGridLayout grid;
-  grid.spacer(8);
+  grid.spacer(PAGE_PADDING);
   grid.setLabelWidth(70);
 
-  for (uint8_t i=0; i<MAX_OUTPUT_CHANNELS; i++) {
-    auto label = new TextButton(window, grid.getLabelSlot(), getSwitchString(SWSRC_SW1+i));
-    window->setFirstField(label);
-
-    Button * button = new LogicalSwitchButton(window, grid.getFieldSlot(), i,
-                                              [=]() -> uint8_t {
-                                                Menu * menu = new Menu();
-                                                LogicalSwitchData * ls = lswAddress(i);
-                                                menu->addLine(STR_EDIT, [=]() {
-                                                  editLogicalSwitch(window, i);
-                                                });
-                                                if (ls->func)
-                                                  menu->addLine(STR_COPY, [=]() {
-                                                    clipboard.type = CLIPBOARD_TYPE_CUSTOM_SWITCH;
-                                                    clipboard.data.csw = *ls;
-                                                  });
-                                                if (clipboard.type == CLIPBOARD_TYPE_CUSTOM_SWITCH)
-                                                  menu->addLine(STR_PASTE, [=]() {
-                                                    *ls = clipboard.data.csw;
-                                                    storageDirty(EE_MODEL);
-                                                    rebuild(window, i);
-                                                  });
-                                                if (ls->func || ls->v1 || ls->v2 || ls->delay || ls->duration || ls->andsw)
-                                                  menu->addLine(STR_CLEAR, [=]() {
-                                                    memset(ls, 0, sizeof(LogicalSwitchData));
-                                                    storageDirty(EE_MODEL);
-                                                    rebuild(window, i);
-                                                  });
-                                                return 0;
-                                              });
-    if (focusIndex == i) {
-      button->setFocus();
+  for (uint8_t i=0; i<MAX_LOGICAL_SWITCHES; i++) {
+    LogicalSwitchData * ls = lswAddress(i);
+    if (ls->func == LS_FUNC_NONE) {
+      auto label = new TextButton(window, grid.getLabelSlot(), getSwitchString(SWSRC_SW1+i));
+      if (!window->getFirstField())
+        window->setFirstField(label);
+      grid.spacer(label->height() + 5);
     }
+    else {
+      new StaticText(window, grid.getLabelSlot(), getSwitchString(SWSRC_SW1 + i), BUTTON_BACKGROUND | CENTERED);
+      Button * button = new LogicalSwitchButton(window, grid.getFieldSlot(), i,
+                                                [=]() -> uint8_t {
+                                                    Menu *menu = new Menu();
+                                                    LogicalSwitchData *ls = lswAddress(i);
+                                                    menu->addLine(STR_EDIT, [=]() {
+                                                        editLogicalSwitch(window, i);
+                                                    });
+                                                    if (ls->func)
+                                                      menu->addLine(STR_COPY, [=]() {
+                                                          clipboard.type = CLIPBOARD_TYPE_CUSTOM_SWITCH;
+                                                          clipboard.data.csw = *ls;
+                                                      });
+                                                    if (clipboard.type == CLIPBOARD_TYPE_CUSTOM_SWITCH)
+                                                      menu->addLine(STR_PASTE, [=]() {
+                                                          *ls = clipboard.data.csw;
+                                                          storageDirty(EE_MODEL);
+                                                          rebuild(window, i);
+                                                      });
+                                                    if (ls->func || ls->v1 || ls->v2 || ls->delay || ls->duration || ls->andsw)
+                                                      menu->addLine(STR_CLEAR, [=]() {
+                                                          memset(ls, 0, sizeof(LogicalSwitchData));
+                                                          storageDirty(EE_MODEL);
+                                                          rebuild(window, i);
+                                                      });
+                                                    return 0;
+                                                });
+      if (!window->getFirstField())
+        window->setFirstField(button);
 
-    grid.spacer(button->height() + 5);
+      if (focusIndex == i) {
+        button->setFocus();
+      }
+
+      grid.spacer(button->height() + 5);
+    }
   }
 
   grid.nextLine();
