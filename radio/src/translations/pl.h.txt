@@ -518,6 +518,7 @@
   #define TR_EXPONAME          "LiniaNazw"
 #define TR_BITMAP              "Obrazek    "
 #define TR_TIMER               TR("Timer", "Timer ")
+#define TR_START                       "Start"
 #define TR_ELIMITS             TR("Limi+25%", "Kanał +/- 125% ")
 #define TR_ETRIMS              TR("E.Trym ", "Poszer Trymery")
 #define TR_TRIMINC             "Krok Trym"

@@ -575,8 +575,8 @@ void ModelSetupPage::build(FormWindow * window)
     // Timer mode
     new StaticText(window, grid.getLabelSlot(true), STR_MODE);
     grid.nextLine();
-    new SwitchChoice(group, timerGrid.getSlot(2, 0), SWSRC_FIRST, SWSRC_LAST, GET_SET_DEFAULT(timer->swtch));
-    new Choice(group, timerGrid.getSlot(2, 1), "\006""Simple""Thr.\0 ""Thr.%", 0, TMRMODE_MAX, GET_SET_DEFAULT(timer->mode));
+    new Choice(group, timerGrid.getSlot(2, 0), "\011""OFF\0     ""ON\0      ""Start\0   ""Thr\0     ""Thr%\0    ""Thr Start", 0, TMRMODE_MAX, GET_SET_DEFAULT(timer->mode));
+    new SwitchChoice(group, timerGrid.getSlot(2, 1), SWSRC_FIRST, SWSRC_LAST, GET_SET_DEFAULT(timer->swtch));
     timerGrid.nextLine();
 
     // Timer start value

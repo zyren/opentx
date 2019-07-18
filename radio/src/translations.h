@@ -206,6 +206,7 @@ extern const char STR_LOADINGMODEL[];
 extern const char STR_NAME[];
 extern const char STR_BITMAP[];
 extern const char STR_TIMER[];
+extern const char STR_START[];
 extern const char STR_ELIMITS[];
 extern const char STR_ETRIMS[];
 extern const char STR_TRIMINC[];

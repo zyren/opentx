@@ -519,6 +519,7 @@
 #endif
 #define TR_BITMAP              "Imagen Modelo"
 #define TR_TIMER               TR("Reloj","Reloj ")
+#define TR_START                       "Start"
 #define TR_ELIMITS             TR("E.Limite","Ampliar Limites")
 #define TR_ETRIMS              TR("E.Trims","Ampliar Trims")
 #define TR_TRIMINC             "Paso Trim"

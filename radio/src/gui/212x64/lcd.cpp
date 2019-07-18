@@ -706,17 +706,6 @@ void drawCurveName(coord_t x, coord_t y, int8_t idx, LcdFlags flags)
   lcdDrawText(x, y, s, flags);
 }
 
-void drawTimerMode(coord_t x, coord_t y, swsrc_t mode, LcdFlags att)
-{
-  if (mode >= 0) {
-    if (mode < TMRMODE_COUNT)
-      return lcdDrawTextAtIndex(x, y, STR_VTMRMODES, mode, att);
-    else
-      mode -= (TMRMODE_COUNT-1);
-  }
-  drawSwitch(x, y, mode, att);
-}
-
 void drawGPSCoord(coord_t x, coord_t y, int32_t value, const char * direction, LcdFlags att, bool seconds=true)
 {
   uint32_t absvalue = abs(value);

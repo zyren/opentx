@@ -521,6 +521,7 @@
   #define TR_EXPONAME          "Nome expo"
 #define TR_BITMAP              "Immagine"
 #define TR_TIMER               TR("Timer","Timer ")
+#define TR_START                       "Start"
 #define TR_ELIMITS             TR("Limiti.E","Limiti Estesi")
 #define TR_ETRIMS              TR("Trim Ext","Trim Estesi")
 #define TR_TRIMINC             "Passo Trim"

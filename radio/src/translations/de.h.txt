@@ -508,6 +508,7 @@
   #define TR_EXPONAME          "Info"
 #define TR_BITMAP              "Modellfoto"
 #define TR_TIMER               TR("Timer", "Timer ")  // für Timer1 Timer2 Timer3
+#define TR_START                       "Start"
 #define TR_ELIMITS             TR("Erw. Limit", "Erw. Wege auf 150%")
 #define TR_ETRIMS              TR("Erw. Trims", "Erw. Trim  auf 100%")
 #define TR_TRIMINC             TR("Trim Schr.", "Trimmschritte")

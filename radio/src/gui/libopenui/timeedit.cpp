@@ -23,6 +23,8 @@
 #include "keyboard_number.h"
 #include "draw_functions.h"
 #include "strhelpers.h"
+#include <keys.h>
+#include <opentx.h>
 
 TimeEdit::TimeEdit(Window * parent, const rect_t & rect, int32_t vmin, int32_t vmax, std::function<int32_t()> getValue, std::function<void(int32_t)> setValue, LcdFlags flags):
   BaseNumberEdit(parent, rect, vmin, vmax, getValue, setValue, flags)
@@ -43,6 +45,37 @@ void TimeEdit::paint(BitmapBuffer * dc)
 
   dc->drawText(FIELD_PADDING_LEFT, FIELD_PADDING_TOP, getTimerString(getValue(), (flags & TIMEHOUR) != 0), textColor);
 }
+
+#if defined(HARDWARE_KEYS)
+// TODO could be moved to BaseNumberEdit
+void TimeEdit::onKeyEvent(event_t event)
+{
+  TRACE_WINDOWS("%s received event 0x%X", getWindowDebugString().c_str(), event);
+
+  if (editMode) {
+    if (event == EVT_ROTARY_RIGHT) {
+      int value = getValue();
+      value += rotencSpeed * step;
+      if (value <= vmax)
+        setValue(value);
+      else
+        AUDIO_KEY_ERROR();
+      return;
+    }
+    else if (event == EVT_ROTARY_LEFT) {
+      int value = getValue();
+      value -= rotencSpeed * step;
+      if (value >= vmin)
+        setValue(value);
+      else
+        AUDIO_KEY_ERROR();
+      return;
+    }
+  }
+
+  FormField::onKeyEvent(event);
+}
+#endif
 
 #if defined(HARDWARE_TOUCH)
 bool TimeEdit::onTouchEnd(coord_t x, coord_t y)

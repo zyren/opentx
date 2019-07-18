@@ -330,18 +330,6 @@ void drawCurveRef(BitmapBuffer * dc, coord_t x, coord_t y, const CurveRef & curv
   }
 }
 
-void drawRtcTime(coord_t x, coord_t y, LcdFlags flags)
-{
-  drawTimer(x, y, getValue(MIXSRC_TX_TIME), flags);
-}
-
-void drawTimer(coord_t x, coord_t y, int32_t tme, LcdFlags flags)
-{
-  char str[LEN_TIMER_STRING];
-  getTimerString(str, tme, (flags & TIMEHOUR) != 0);
-  lcdDrawText(x, y, str, flags);
-}
-
 void putsStickName(coord_t x, coord_t y, uint8_t idx, LcdFlags att)
 {
   uint8_t length = STR_VSRCRAW[0];
@@ -367,21 +355,6 @@ void drawCurveName(coord_t x, coord_t y, int8_t idx, LcdFlags flags)
   lcdDrawText(x, y, s, flags);
 }
 
-//void drawTimerMode(BitmapBuffer * dc, coord_t x, coord_t y, int32_t mode, LcdFlags att)
-//{
-//  if (mode >= 0) {
-//    if (mode < TMRMODE_COUNT) {
-//      lcdDrawTextAtIndex(dc, x, y, STR_VTMRMODES, mode, att);
-//      return;
-//    }
-//    else {
-//      mode -= (TMRMODE_COUNT-1);
-//    }
-//  }
-//  drawSwitch(dc, x, y, mode, att);
-//}
-
-
 void drawSource(BitmapBuffer * dc, coord_t x, coord_t y, mixsrc_t idx, LcdFlags flags)
 {
   char s[16];
@@ -396,20 +369,20 @@ void drawSwitch(BitmapBuffer * dc, coord_t x, coord_t y, int32_t idx, LcdFlags f
   dc->drawText(x, y, s, flags);
 }
 
-void drawTrimMode(coord_t x, coord_t y, uint8_t phase, uint8_t idx, LcdFlags att)
+void drawTrimMode(BitmapBuffer * dc, coord_t x, coord_t y, uint8_t phase, uint8_t idx, LcdFlags att)
 {
   trim_t v = getRawTrimValue(phase, idx);
   unsigned int mode = v.mode;
   unsigned int p = mode >> 1;
 
   if (mode == TRIM_MODE_NONE) {
-    lcdDrawText(x, y, "--", att);
+    dc->drawText(x, y, "--", att);
   }
   else {
     char s[2];
     s[0] = (mode % 2 == 0) ? ':' : '+';
     s[1] = '0'+p;
-    lcdDrawSizedText(x, y, s, 2, att);
+    dc->drawSizedText(x, y, s, 2, att);
   }
 }
 
@@ -577,7 +550,7 @@ void drawSourceCustomValue(BitmapBuffer * dc, coord_t x, coord_t y, source_t sou
   }
   else if (source >= MIXSRC_FIRST_TIMER || source == MIXSRC_TX_TIME) {
     if (value < 0) flags |= BLINK|INVERS;
-    drawTimer(x, y, value, flags);
+    // TODO drawTimer(dc, x, y, value, flags);
   }
   else if (source == MIXSRC_TX_VOLTAGE) {
     lcdDrawNumber(x, y, value, flags|PREC1);

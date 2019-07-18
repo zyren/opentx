@@ -413,8 +413,8 @@
 #define TR_RESERVE_VSRCRAW           "[--]"
 #define TR_EXTRA_VSRCRAW             "Batt""Time""GPS\0" TR_RESERVE_VSRCRAW TR_RESERVE_VSRCRAW TR_RESERVE_VSRCRAW TR_RESERVE_VSRCRAW "Tmr1""Tmr2""Tmr3"
 
-#define LEN_VTMRMODES                  "\003"
-#define TR_VTMRMODES                   "OFF""ON\0""THs""TH%""THt"
+#define LEN_VTMRMODES                  "\004"
+#define TR_VTMRMODES                   "OFF\0""ON\0 ""Strt""THs\0""TH%\0""THt"
 
 #define LEN_VTRAINERMODES              "\022"
 #define TR_VTRAINER_MASTER_JACK        "Master/Jack\0      "
@@ -499,6 +499,7 @@
 #define TR_EXPONAME                    TR("Name", "Line name")
 #define TR_BITMAP                      "Model image"
 #define TR_TIMER                       TR("Timer", "Timer ")
+#define TR_START                       "Start"
 #define TR_ELIMITS                     TR("E.Limits", "Extended limits")
 #define TR_ETRIMS                      TR("E.Trims", "Extended trims")
 #define TR_TRIMINC                     "Trim Step"

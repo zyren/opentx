@@ -517,6 +517,7 @@
 #endif
 #define TR_BITMAP              "Modellikon"
 #define TR_TIMER               TR("Timer","Timer ")
+#define TR_START                       "Start"
 #define TR_ELIMITS             TR("Gränser++","Utökade Gränser")
 #define TR_ETRIMS              TR("Trimmar++","Utökade Trimmar")
 #define TR_TRIMINC             TR("Trimning","Trimökning")

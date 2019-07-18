@@ -504,6 +504,7 @@
 #endif
 #define TR_BITMAP              "Model Image"
 #define TR_TIMER               "Cronom"
+#define TR_START                       "Start"
 #define TR_ELIMITS             "E.Limits"
 #define TR_ETRIMS              "E.Trims"
 #define TR_TRIMINC             "Trim Step"

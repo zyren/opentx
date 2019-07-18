@@ -517,6 +517,7 @@
 #define TR_EXPONAME                    TR("Nom", "Nom ligne")
 #define TR_BITMAP                      "Image du modèle"
 #define TR_TIMER                       "Chrono "
+#define TR_START                       "Start"
 #define TR_ELIMITS                     TR("Limites ét.", "Limites étendues")
 #define TR_ETRIMS                      TR("Trims ét.", "Trims étendus")
 #define TR_TRIMINC                     TR("Pas Trim", "Pas des trims")

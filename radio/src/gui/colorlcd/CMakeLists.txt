@@ -62,6 +62,11 @@ if(HELI)
   add_gui_src(model_heli.cpp)
 endif()
 
+
+if(PXX2 OR LUA)
+  add_gui_src(radio_tools.cpp)
+endif()
+
 if(LUA STREQUAL YES)
   # TODO set(SRC ${SRC} lua/widgets.cpp)
   # TODO set(GUI_SRC ${GUI_SRC} model_custom_scripts.cpp)

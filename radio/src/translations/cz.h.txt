@@ -494,6 +494,7 @@
   #define TR_EXPONAME                  "Popis"
 #define TR_BITMAP                      "Obrázek"
 #define TR_TIMER                       "Stopky"
+#define TR_START                       "Start"
 #define TR_ELIMITS                     TR("Limit +25%", "Kanál +/- 125%")
 #define TR_ETRIMS                      TR("širší Trim", "Široký trim")
 #define TR_TRIMINC                     TR("Krok Trimu", "Krok trimu")
