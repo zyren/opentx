@@ -93,7 +93,7 @@ class ToolsButton : public Button {
 };
 
 RadioToolsPage::RadioToolsPage() :
-  PageTab(STR_MENUTOOLS, ICON_MODEL_OUTPUTS)
+  PageTab(STR_MENUTOOLS, ICON_RADIO_TOOLS)
 {
 }
 
@@ -110,7 +110,6 @@ void RadioToolsPage::build(FormWindow * window, int8_t focusChannel)
   FormGridLayout grid;
   grid.spacer(8);
   grid.setLabelWidth(66);
-  uint8_t index=1;
 
 #if 1 //defined(LUA)
   FILINFO fno;
@@ -143,8 +142,7 @@ void RadioToolsPage::build(FormWindow * window, int8_t focusChannel)
           *ext = '\0';
           label = getBasename(path);
         }
-        strAppendUnsigned(reusableBuffer.radioTools.msg, index++);
-        new StaticText(window, grid.getLabelSlot(), reusableBuffer.radioTools.msg, BUTTON_BACKGROUND | CENTERED);
+        new StaticText(window, grid.getLabelSlot(), "lua", BUTTON_BACKGROUND | CENTERED);
         auto button = new ToolsButton(window, grid.getFieldSlot(1), label);
         if (!window->getFirstField())
           window->setFirstField(button);
