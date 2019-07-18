@@ -118,7 +118,7 @@ void TabsGroup::removeTab(unsigned index)
 void TabsGroup::setCurrentTab(PageTab * tab)
 {
   if (tab != currentTab) {
-    clearFocus();
+    setFocus();
     body.clear();
 #if defined(HARDWARE_TOUCH)
     TextKeyboard::instance()->disable(false);
