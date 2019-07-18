@@ -2063,6 +2063,10 @@ uint32_t pwrCheck()
           lcdRefreshWait();
           lcdClear();
 
+#if defined(COLORLCD)
+#warning "Model shutdown confirmation"
+          return e_power_off;
+#else
           POPUP_CONFIRMATION(STR_MODEL_SHUTDOWN, nullptr);
           SET_WARNING_INFO(STR_MODEL_STILL_POWERED, sizeof(TR_MODEL_STILL_POWERED), 0);
           event_t evt = getEvent(false);
@@ -2078,6 +2082,7 @@ uint32_t pwrCheck()
             pwr_check_state = PWR_CHECK_PAUSED;
             return e_power_on;
           }
+#endif
         }
         haptic.play(15, 3, PLAY_NOW);
         pwr_check_state = PWR_CHECK_OFF;

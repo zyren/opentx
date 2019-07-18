@@ -36,8 +36,8 @@ Dialog::Dialog(uint8_t type, std::string title, std::string message, std::functi
   type(type),
   title(std::move(title)),
   message(std::move(message)),
-  previousFocus(focusWindow),
-  confirmHandler(confirmHandler)
+  confirmHandler(confirmHandler),
+  previousFocus(focusWindow)
 {
 #if defined(HARDWARE_TOUCH)
   new FabIconButton(this, LCD_W - 50, ALERT_BUTTON_TOP, ICON_NEXT,
@@ -63,7 +63,7 @@ void Dialog::paint(BitmapBuffer * dc)
     dc->drawBitmap(ALERT_BITMAP_PADDING, ALERT_FRAME_TOP + ALERT_BITMAP_PADDING, theme->asterisk);
   else if (type == WARNING_TYPE_INFO)
     dc->drawBitmap(ALERT_BITMAP_PADDING, ALERT_FRAME_TOP + ALERT_BITMAP_PADDING, theme->busy);
-  else // CONFIRMATION
+  else // confirmation
     dc->drawBitmap(ALERT_BITMAP_PADDING, ALERT_FRAME_TOP + ALERT_BITMAP_PADDING, theme->question);
 
   if (type == WARNING_TYPE_ALERT) {
