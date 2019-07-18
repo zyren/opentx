@@ -24,5 +24,12 @@ class RadioToolsPage: public PageTab {
   public:
     RadioToolsPage();
 
-    void build(FormWindow * window) override;
+    virtual void build(FormWindow * window) override
+    {
+      build(window, -1);
+    }
+
+  protected:
+    void build(FormWindow * window, int8_t focusChannel);
+    void rebuild(FormWindow * window, int8_t focusChannel);
 };

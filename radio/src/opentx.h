@@ -1192,6 +1192,7 @@ union ReusableBuffer
   struct {
     ModuleInformation modules[NUM_MODULES];
     uint8_t linesCount;
+    char msg[64];
   } radioTools;
 
   struct {
