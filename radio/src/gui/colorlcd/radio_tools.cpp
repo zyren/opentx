@@ -18,26 +18,21 @@
  * GNU General Public License for more details.
  */
 
-#include "opentx.h"
-#include "menu_radio.h"
-#include "radio_setup.h"
-#include "radio_sdmanager.h"
+#include <algorithm>
 #include "radio_tools.h"
-#include "special_functions.h"
-#include "radio_calibration.h"
-#include "radio_trainer.h"
-#include "radio_version.h"
-#include "radio_hardware.h"
-#include "myeeprom.h"
+#include "opentx.h"
+#include "libopenui.h"
 
-RadioMenu::RadioMenu():
-  TabsGroup(ICON_RADIO)
+RadioToolsPage::RadioToolsPage():
+  PageTab(STR_MENUTOOLS, ICON_RADIO_VERSION)  //TODO : need a new icon
 {
-  addTab(new RadioSetupPage());
-  addTab(new RadioSdManagerPage());
-  addTab(new RadioToolsPage());
-  addTab(new SpecialFunctionsPage(g_eeGeneral.customFn));
-  addTab(new RadioTrainerPage());
-  addTab(new RadioHardwarePage());
-  addTab(new RadioVersionPage());
+}
+
+
+void RadioToolsPage::build(FormWindow * window)
+{
+  FormGridLayout grid;
+  grid.setLabelWidth(120);
+  grid.spacer(PAGE_PADDING);
+
 }

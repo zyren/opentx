@@ -42,6 +42,7 @@ set(GUI_SRC
   menu_radio.cpp
   radio_setup.cpp
   radio_sdmanager.cpp
+  radio_tools.cpp
   radio_trainer.cpp
   radio_version.cpp
   radio_hardware.cpp
