@@ -259,7 +259,7 @@ class ModuleWindow : public Window {
                               });
       }
       else if (isModulePXX2(moduleIndex)) {
-        rfChoice = new Choice(this, grid.getFieldSlot(2, 1), STR_ISRM_RF_PROTOCOLS, 0, MODULE_SUBTYPE_ISRM_PXX2_LAST,
+        rfChoice = new Choice(this, grid.getFieldSlot(2, 1), STR_ISRM_RF_PROTOCOLS, 0, MODULE_SUBTYPE_ISRM_PXX2_ACCST_LR12,
                               GET_DEFAULT(g_model.moduleData[moduleIndex].subType),
                               [=](int32_t newValue) {
                                   g_model.moduleData[moduleIndex].subType = newValue;
@@ -308,7 +308,7 @@ class ModuleWindow : public Window {
       // Module parameters
 
       // Bind and Range buttons
-      if (isModuleBindRangeAvailable(moduleIndex)) {
+      if (!isModuleRFAccess(moduleIndex) && isModuleBindRangeAvailable(moduleIndex)) {
         bindButton = new TextButton(this, grid.getFieldSlot(2, 0), STR_MODULE_BIND);
         bindButton->setPressHandler([=]() -> uint8_t {
           if (moduleState[moduleIndex].mode == MODULE_MODE_RANGECHECK) {
@@ -352,48 +352,6 @@ class ModuleWindow : public Window {
         grid.nextLine();
       }
 
-      // Register and Range buttons
-      if (isModuleRFAccess(moduleIndex)) {
-        new StaticText(this, grid.getLabelSlot(true), STR_MODULE);
-        registerButton = new TextButton(this, grid.getFieldSlot(2, 0), STR_REGISTER);
-        registerButton->setPressHandler([=]() -> uint8_t {
-          if (moduleState[moduleIndex].mode == MODULE_MODE_RANGECHECK) {
-            rangeButton->check(false);
-          }
-          if (moduleState[moduleIndex].mode == MODULE_MODE_REGISTER) {
-            moduleState[moduleIndex].mode = MODULE_MODE_NORMAL;
-            return 0;
-          }
-          else {
-            moduleState[moduleIndex].mode = MODULE_MODE_REGISTER;
-            return 1;
-          }
-        });
-        registerButton->setCheckHandler([=]() {
-          if (moduleState[moduleIndex].mode != MODULE_MODE_REGISTER) {
-            registerButton->check(false);
-          }
-        });
-
-        rangeButton = new TextButton(this, grid.getFieldSlot(2, 1), STR_MODULE_RANGE);
-        rangeButton->setPressHandler([=]() -> uint8_t {
-          if (moduleState[moduleIndex].mode == MODULE_MODE_REGISTER) {
-            registerButton->check(false);
-            moduleState[moduleIndex].mode = MODULE_MODE_NORMAL;
-          }
-          if (moduleState[moduleIndex].mode == MODULE_MODE_RANGECHECK) {
-            moduleState[moduleIndex].mode = MODULE_MODE_NORMAL;
-            return 0;
-          }
-          else {
-            moduleState[moduleIndex].mode = MODULE_MODE_RANGECHECK;
-            return 1;
-          }
-        });
-
-        grid.nextLine();
-      }
-
       // Failsafe
       if (isModuleFailsafeAvailable(moduleIndex)) {
         new StaticText(this, grid.getLabelSlot(true), STR_FAILSAFE);
@@ -412,6 +370,48 @@ class ModuleWindow : public Window {
                            return 1;
                          });
         }
+        grid.nextLine();
+      }
+
+      // Register and Range buttons
+      if (isModuleRFAccess(moduleIndex)) {
+        new StaticText(this, grid.getLabelSlot(true), STR_MODULE);
+        registerButton = new TextButton(this, grid.getFieldSlot(2, 0), STR_REGISTER);
+        registerButton->setPressHandler([=]() -> uint8_t {
+            if (moduleState[moduleIndex].mode == MODULE_MODE_RANGECHECK) {
+              rangeButton->check(false);
+            }
+            if (moduleState[moduleIndex].mode == MODULE_MODE_REGISTER) {
+              moduleState[moduleIndex].mode = MODULE_MODE_NORMAL;
+              return 0;
+            }
+            else {
+              moduleState[moduleIndex].mode = MODULE_MODE_REGISTER;
+              return 1;
+            }
+        });
+        registerButton->setCheckHandler([=]() {
+            if (moduleState[moduleIndex].mode != MODULE_MODE_REGISTER) {
+              registerButton->check(false);
+            }
+        });
+
+        rangeButton = new TextButton(this, grid.getFieldSlot(2, 1), STR_MODULE_RANGE);
+        rangeButton->setPressHandler([=]() -> uint8_t {
+            if (moduleState[moduleIndex].mode == MODULE_MODE_REGISTER) {
+              registerButton->check(false);
+              moduleState[moduleIndex].mode = MODULE_MODE_NORMAL;
+            }
+            if (moduleState[moduleIndex].mode == MODULE_MODE_RANGECHECK) {
+              moduleState[moduleIndex].mode = MODULE_MODE_NORMAL;
+              return 0;
+            }
+            else {
+              moduleState[moduleIndex].mode = MODULE_MODE_RANGECHECK;
+              return 1;
+            }
+        });
+
         grid.nextLine();
       }
 

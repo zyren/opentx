@@ -24,7 +24,7 @@ class RadioToolsPage: public PageTab {
   public:
     RadioToolsPage();
 
-²    void build(FormWindow * window) override
+    void build(FormWindow * window) override
     {
       build(window, -1);
     }
