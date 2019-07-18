@@ -19,6 +19,7 @@ macro(add_truetype_font_target name font size offset)
   add_custom_target(truetype_font_${name}
     COMMAND ${PYTHON_EXECUTABLE} ${RADIO_DIRECTORY}/util/font2png.py ${font} ${size} ${offset} ${target}
     WORKING_DIRECTORY ${RADIO_SRC_DIRECTORY}
+    DEPENDS ${RADIO_DIRECTORY}/util/font2png.py
   )
   set(truetype_fonts_targets ${truetype_fonts_targets} truetype_font_${name})
 endmacro()

@@ -686,15 +686,15 @@ void ModelSetupPage::build(FormWindow * window)
       auto button = new TextButton(group, switchesGrid.getSlot(3, i % 3), getSwitchWarningString(s, i), nullptr,
                                    (bfGet(g_model.switchWarningState, 3 * i, 3) == 0 ? 0 : BUTTON_CHECKED));
       button->setPressHandler([button, i] {
-        swarnstate_t newstate = bfGet(g_model.switchWarningState, 3 * i, 3);
-        if (newstate == 1 && SWITCH_CONFIG(i) != SWITCH_3POS)
-          newstate = 3;
-        else
-          newstate = (newstate + 1) % 4;
-        bfSet(g_model.switchWarningState, newstate, 3 * i, 3);
-        SET_DIRTY();
-        button->setText(getSwitchWarningString(i));
-        return newstate > 0;
+          swarnstate_t newstate = bfGet(g_model.switchWarningState, 3 * i, 3);
+          if (newstate == 1 && SWITCH_CONFIG(i) != SWITCH_3POS)
+            newstate = 3;
+          else
+            newstate = (newstate + 1) % 4;
+          g_model.switchWarningState = bfSet(g_model.switchWarningState, newstate, 3 * i, 3);
+          SET_DIRTY();
+          button->setText(getSwitchWarningString(i));
+          return newstate > 0;
       });
       if (i == 0)
         group->setFirstField(button);
@@ -706,20 +706,20 @@ void ModelSetupPage::build(FormWindow * window)
 
   // Center beeps
   {
-    new StaticText(window, grid.getLabelSlot(true), STR_BEEPCTR);
+    new StaticText(window, grid.getLabelSlot(false), STR_BEEPCTR);
     auto group = new FormGroup(window, grid.getFieldSlot(), BORDER_FOCUS_ONLY | PAINT_CHILDREN_FIRST);
     GridLayout centerGrid(group);
     for (int i = 0; i < NUM_STICKS + NUM_POTS + NUM_SLIDERS; i++) {
       char s[2];
-      if (i > 0 && (i % 3) == 0)
+      if (i > 0 && (i % 6) == 0)
         centerGrid.nextLine();
 
-      auto button = new TextButton(group, centerGrid.getSlot(3, i % 3), getStringAtIndex(s, STR_RETA123, i),
-                     [=]() -> uint8_t {
-                       BFBIT_FLIP(g_model.beepANACenter, bfBit<BeepANACenter>(i));
-                       SET_DIRTY();
-                       return bfSingleBitGet<BeepANACenter>(g_model.beepANACenter, i);
-                     },
+      auto button = new TextButton(group, centerGrid.getSlot(6, i % 6), getStringAtIndex(s, STR_RETA123, i),
+                                   [=]() -> uint8_t {
+                                       BFBIT_FLIP(g_model.beepANACenter, bfBit<BeepANACenter>(i));
+                                       SET_DIRTY();
+                                       return bfSingleBitGet<BeepANACenter>(g_model.beepANACenter, i);
+                                   },
                                    bfSingleBitGet(g_model.beepANACenter, i) ? BUTTON_CHECKED : 0);
       if (i == 0)
         group->setFirstField(button);
