@@ -23,9 +23,11 @@
 #include "opentx.h"
 #include "libopenui.h"
 
+extern uint8_t g_moduleIdx;
+
 #define TOOL_NAME_MAXLEN  16
 
-#if 1 //defined(LUA)
+#if defined(LUA) || defined(DEBUG)
 bool readToolName(const char * filename, char * name)
 {
   FIL file;
@@ -72,9 +74,11 @@ bool isRadioScriptTool(const char * filename)
 
 class ToolsButton : public Button {
   public:
-    ToolsButton(Window * parent, const rect_t &rect, const char * toolname) :
+    ToolsButton(Window * parent, const rect_t &rect, const char * toolname, std::function<uint8_t(void)> pressHandler=nullptr, uint8_t flags=0) :
       Button(parent, rect),
-      toolname(toolname)
+      toolname(toolname),
+      pressHandler(pressHandler),
+      flags(flags)
     {
       strcpy(msg, toolname);
     }
@@ -90,6 +94,9 @@ class ToolsButton : public Button {
   protected:
     const char * toolname;
     char msg[20];
+    std::function<uint8_t(void)> pressHandler;
+    std::function<void(void)> checkHandler;
+    uint8_t flags;
 };
 
 RadioToolsPage::RadioToolsPage() :
@@ -109,9 +116,22 @@ void RadioToolsPage::build(FormWindow * window, int8_t focusChannel)
 {
   FormGridLayout grid;
   grid.spacer(8);
-  grid.setLabelWidth(66);
+  grid.setLabelWidth(100);
 
-#if 1 //defined(LUA)
+  memclear(&reusableBuffer.radioTools, sizeof(reusableBuffer.radioTools));
+#if defined(PXX2)
+  if (!initDone) {
+    for (uint8_t module = 0; module < NUM_MODULES; module++) {
+      if (isModulePXX2(module) && (module == INTERNAL_MODULE ? IS_INTERNAL_MODULE_ON() : IS_EXTERNAL_MODULE_ON())) {
+        moduleState[module].readModuleInformation(&reusableBuffer.radioTools.modules[module], PXX2_HW_INFO_TX_ID, PXX2_HW_INFO_TX_ID);
+      }
+    }
+    initDone = true;
+  }
+#endif
+
+// LUA scripts in TOOLS
+#if defined(LUA) || defined(DEBUG)
   FILINFO fno;
   DIR dir;
 
@@ -143,7 +163,11 @@ void RadioToolsPage::build(FormWindow * window, int8_t focusChannel)
           label = getBasename(path);
         }
         new StaticText(window, grid.getLabelSlot(), "lua", BUTTON_BACKGROUND | CENTERED);
-        auto button = new ToolsButton(window, grid.getFieldSlot(1), label);
+        auto button = new ToolsButton(window, grid.getFieldSlot(1), label, [=]() -> uint8_t {
+          f_chdir("/SCRIPTS/TOOLS/");
+          //luaExec(path);
+          return 0;
+        }, 0);
         if (!window->getFirstField())
           window->setFirstField(button);
         grid.nextLine();
@@ -152,7 +176,55 @@ void RadioToolsPage::build(FormWindow * window, int8_t focusChannel)
   }
 #endif
 
-  grid.nextLine();
+#if defined(PXX2) || defined(DEBUG)
+// PXX2 modules tools
+  if (1)  {// (isModuleOptionAvailable(reusableBuffer.hardwareAndSettings.modules[INTERNAL_MODULE].information.modelID, MODULE_OPTION_SPECTRUM_ANALYSER)) {
+    new StaticText(window, grid.getLabelSlot(), "access", BUTTON_BACKGROUND | CENTERED);
+    auto button = new ToolsButton(window, grid.getFieldSlot(1), STR_SPECTRUM_ANALYSER_INT, [=]() -> uint8_t {
+      g_moduleIdx = INTERNAL_MODULE;
+      //pushMenu(menuRadioSpectrumAnalyser);
+      return 0;
+    }, 0);
+    if (!window->getFirstField())
+      window->setFirstField(button);
+    grid.nextLine();
+  }
 
+  if (1)  {// (isModuleOptionAvailable(reusableBuffer.hardwareAndSettings.modules[INTERNAL_MODULE].information.modelID, MODULE_OPTION_POWER_METER)) {
+    new StaticText(window, grid.getLabelSlot(), "access", BUTTON_BACKGROUND | CENTERED);
+    auto button = new ToolsButton(window, grid.getFieldSlot(1), STR_POWER_METER_INT, [=]() -> uint8_t {
+      g_moduleIdx = INTERNAL_MODULE;
+      //pushMenu(menuRadioPowerMeter);
+      return 0;
+    }, 0);
+    if (!window->getFirstField())
+      window->setFirstField(button);
+    grid.nextLine();
+  }
+
+  if (1)  {// (isModuleOptionAvailable(reusableBuffer.hardwareAndSettings.modules[EXTERNAL_MODULE].information.modelID, MODULE_OPTION_SPECTRUM_ANALYSER)) {
+    new StaticText(window, grid.getLabelSlot(), "access", BUTTON_BACKGROUND | CENTERED);
+    auto button = new ToolsButton(window, grid.getFieldSlot(1), STR_SPECTRUM_ANALYSER_EXT, [=]() -> uint8_t {
+      g_moduleIdx = EXTERNAL_MODULE;
+      //pushMenu(menuRadioSpectrumAnalyser);
+      return 0;
+    }, 0);
+    if (!window->getFirstField())
+      window->setFirstField(button);
+    grid.nextLine();
+  }
+
+  if (1)  {// (isModuleOptionAvailable(reusableBuffer.hardwareAndSettings.modules[EXTERNAL_MODULE].information.modelID, MODULE_OPTION_POWER_METER)) {
+    new StaticText(window, grid.getLabelSlot(), "access", BUTTON_BACKGROUND | CENTERED);
+    auto button = new ToolsButton(window, grid.getFieldSlot(1), STR_POWER_METER_EXT, [=]() -> uint8_t {
+      g_moduleIdx = EXTERNAL_MODULE;
+      //pushMenu(menuRadioPowerMeter);
+      return 0;
+    }, 0);
+    if (!window->getFirstField())
+      window->setFirstField(button);
+    grid.nextLine();
+  }
+#endif
   window->setInnerHeight(grid.getWindowHeight());
 }

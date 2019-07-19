@@ -32,4 +32,5 @@ class RadioToolsPage: public PageTab {
   protected:
     void build(FormWindow * window, int8_t focusChannel);
     void rebuild(FormWindow * window, int8_t focusChannel);
+    bool initDone = false;
 };
