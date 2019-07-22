@@ -70,8 +70,8 @@ class GridLayout {
 
 class FormGridLayout: public GridLayout {
   public:
-    FormGridLayout():
-      GridLayout(LCD_W)
+    FormGridLayout(coord_t width = LCD_W):
+      GridLayout(width)
     {
     }
 
@@ -92,12 +92,14 @@ class FormGridLayout: public GridLayout {
 
     rect_t getLineSlot()
     {
-      return { lineMarginLeft, currentY, LCD_W - lineMarginRight - lineMarginLeft, PAGE_LINE_HEIGHT };
+      return { lineMarginLeft, currentY, this->width - lineMarginRight - lineMarginLeft, PAGE_LINE_HEIGHT };
     }
 
-    rect_t getCenteredSlot(coord_t width = LCD_W ) const
+    rect_t getCenteredSlot(coord_t width = 0 ) const
     {
-      return { lineMarginLeft + (LCD_W - width)/2, currentY, min(width, LCD_W - lineMarginRight - lineMarginLeft), PAGE_LINE_HEIGHT };
+      if (width == 0)
+        width = this->width;
+      return { lineMarginLeft + (this->width - width)/2, currentY, min(width, this->width - lineMarginRight - lineMarginLeft), PAGE_LINE_HEIGHT };
     }
 
     rect_t getLabelSlot(bool indent = false) const
@@ -108,7 +110,7 @@ class FormGridLayout: public GridLayout {
 
     rect_t getFieldSlot(uint8_t count = 1, uint8_t index = 0) const
     {
-      coord_t width = (LCD_W - labelWidth - lineMarginRight - (count - 1) * PAGE_LINE_SPACING) / count;
+      coord_t width = (this->width - labelWidth - lineMarginRight - (count - 1) * PAGE_LINE_SPACING) / count;
       coord_t left = labelWidth + (width + PAGE_LINE_SPACING) * index;
       return {left, currentY, width, PAGE_LINE_HEIGHT};
     }

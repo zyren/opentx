@@ -156,25 +156,80 @@ FailSafeMenu::FailSafeMenu(uint8_t moduleIndex) :
 class RegisterDialog: public Dialog {
   public:
     RegisterDialog():
-      Dialog(STR_REGISTER, {50, 50, LCD_W - 100, LCD_H - 100})
+      Dialog(STR_REGISTER, {50, 73, LCD_W - 100, LCD_H - 146})
     {
-      FormGridLayout grid;
+      FormGridLayout grid(width());
+      grid.setLabelWidth(150);
       grid.spacer(PAGE_LINE_HEIGHT + 8);
 
-      // Name
-      new StaticText(this, grid.getLabelSlot(), STR_NAME);
+      // Register ID
+      new StaticText(this, grid.getLabelSlot(), STR_REG_ID);
       auto edit = new TextEdit(this, grid.getFieldSlot(), g_model.modelRegistrationID, sizeof(g_model.modelRegistrationID));
-      edit->setFocus();
       grid.nextLine();
-//
-//      // Offset
-//      new StaticText(window, grid.getLabelSlot(), TR_LIMITS_HEADERS_SUBTRIM);
-//      new NumberEdit(window, grid.getFieldSlot(), -1000, +1000, GET_SET_DEFAULT(output->offset), PREC1);
-//      grid.nextLine();
+
+      // UID
+      new StaticText(this, grid.getLabelSlot(), "UID");
+      uid = new NumberEdit(this, grid.getFieldSlot(), 0, 2, GET_SET_DEFAULT(reusableBuffer.moduleSetup.pxx2.registerLoopIndex));
+      grid.nextLine();
+
+      // RX name
+      new StaticText(this, grid.getLabelSlot(), STR_RX_NAME);
+//      if (reusableBuffer.moduleSetup.pxx2.registerStep < REGISTER_RX_NAME_RECEIVED) {
+      waiting = new StaticText(this, grid.getFieldSlot(), STR_WAITING);
+      grid.nextLine();
+      grid.spacer(6);
+
+      // edit = new TextEdit(this, grid.getFieldSlot(), reusableBuffer.moduleSetup.pxx2.registerRxName, PXX2_LEN_RX_NAME);
+
+
+//        lcdDrawText(WARNING_LINE_X, WARNING_LINE_Y - 4 + 2 * FH, STR_WAITING);
+//        lcdDrawText(WARNING_LINE_X, WARNING_LINE_Y - 2 + 3 * FH, TR_EXIT, menuVerticalPosition == ITEM_REGISTER_BUTTONS ? INVERS : 0);
+//      }
+//      else {
+//        lcdDrawText(WARNING_LINE_X, WARNING_LINE_Y - 4 + 2 * FH, STR_RX_NAME);
+//        editName(WARNING_LINE_X + 8*FW, WARNING_LINE_Y - 4 + 2 * FH, reusableBuffer.moduleSetup.pxx2.registerRxName, PXX2_LEN_RX_NAME, event, menuVerticalPosition == ITEM_REGISTER_RECEIVER_NAME);
+//        lcdDrawText(WARNING_LINE_X, WARNING_LINE_Y - 2 + 3 * FH, TR_ENTER, menuVerticalPosition == ITEM_REGISTER_BUTTONS && menuHorizontalPosition == 0 ? INVERS : 0);
+//        lcdDrawText(WARNING_LINE_X + 8*FW, WARNING_LINE_Y - 2 + 3 * FH, TR_EXIT, menuVerticalPosition == ITEM_REGISTER_BUTTONS && menuHorizontalPosition == 1 ? INVERS : 0);
+//      }
+
+      // Buttons
+      exitButton = new TextButton(this, grid.getLabelSlot(), "EXIT",
+                                   [=]() -> int8_t {
+                                       reusableBuffer.moduleSetup.pxx2.registerStep = REGISTER_RX_NAME_RECEIVED;
+                                       return 0;
+                                   });
+      exitButton->setFocus();
+      FormField::link(exitButton, edit);
+    }
+
+    void checkEvents() override
+    {
+      if (reusableBuffer.moduleSetup.pxx2.registerStep >= REGISTER_RX_NAME_RECEIVED && !rxName) {
+        rect_t rect = waiting->getRect();
+        waiting->deleteLater();
+        rxName = new TextEdit(this, rect, reusableBuffer.moduleSetup.pxx2.registerRxName, PXX2_LEN_RX_NAME);
+        rect = exitButton->getRect();
+        auto okButton = new TextButton(this, rect, "OK",
+                                    [=]() -> int8_t {
+
+                                        return 0;
+                                    });
+        exitButton->setLeft(left() + rect.w + 10);
+        FormField::link(uid, rxName);
+        FormField::link(rxName, okButton);
+        FormField::link(okButton, exitButton);
+        // FormField::link(exitButton, getFirstField());
+        okButton->setFocus();
+      }
+
+      Dialog::checkEvents();
     }
 
   protected:
-
+    NumberEdit * uid;
+    StaticText * waiting;
+    TextEdit * rxName = nullptr;
+    TextButton * exitButton;
 };
 
 class ModuleWindow : public Window {

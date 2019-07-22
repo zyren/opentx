@@ -484,10 +484,10 @@
 #endif
 
 #if defined(PCBHORUS)
-  #define TR_EXIT                      "[RTN]"
+  #define TR_EXIT                      "RTN"
   #define TR_OK                        TR_ENTER
 #else
-  #define TR_EXIT                      "[EXIT]"
+  #define TR_EXIT                      "EXIT"
   #define TR_OK                        TR("\010" "\010" "\010" "[OK]", "\010" "\010" "\010" "\010" "\010" "[OK]")
 #endif
 
