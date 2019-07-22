@@ -449,7 +449,7 @@ void ModelTelemetryPage::build(FormWindow * window, int8_t focusSensorIndex)
             rebuild(window, newIndex);
           }
           else {
-            new Dialog(WARNING_TYPE_ALERT, "", STR_TELEMETRYFULL);
+            new FullScreenDialog(WARNING_TYPE_ALERT, "", STR_TELEMETRYFULL);
           }
         });
         menu->addLine(STR_DELETE, [=]() {
@@ -487,7 +487,7 @@ void ModelTelemetryPage::build(FormWindow * window, int8_t focusSensorIndex)
                    if (res >= 0)
                      editSensor(window, res);
                    else
-                     new Dialog(WARNING_TYPE_ALERT, "", STR_TELEMETRYFULL);
+                     new FullScreenDialog(WARNING_TYPE_ALERT, "", STR_TELEMETRYFULL);
                    return 0;
                  });
   grid.nextLine();
@@ -495,7 +495,7 @@ void ModelTelemetryPage::build(FormWindow * window, int8_t focusSensorIndex)
   // Delete all sensors button
   new TextButton(window, grid.getLineSlot(), STR_DELETE_ALL_SENSORS,
                  []() -> uint8_t {
-                   new Dialog(WARNING_TYPE_CONFIRM, STR_CONFIRMDELETE, "", [=]() {
+                   new FullScreenDialog(WARNING_TYPE_CONFIRM, STR_CONFIRMDELETE, "", [=]() {
                      for (int i = 0; i < MAX_TELEMETRY_SENSORS; i++) {
                        delTelemetryIndex(i);
                      }

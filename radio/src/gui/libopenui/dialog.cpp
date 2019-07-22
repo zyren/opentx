@@ -22,6 +22,27 @@
 #include "mainwindow.h"
 #include "opentx.h"
 
+Dialog::Dialog(std::string title, const rect_t rect):
+  Window(&mainWindow, rect, OPAQUE),
+  title(std::move(title)),
+  confirmHandler(confirmHandler),
+  previousFocus(focusWindow)
+{
+  bringToTop();
+  FormField::clearCurrentField();
+  setFocus();
+}
+
+void Dialog::paint(BitmapBuffer * dc)
+{
+  dc->drawRect(0, 0, width() - 1, height() - 1, 1, SOLID, TEXT_COLOR);
+  dc->drawSolidFilledRect(1, 1, width() - 3, PAGE_LINE_HEIGHT, TITLE_BGCOLOR);
+  dc->drawText(FIELD_PADDING_LEFT, FIELD_PADDING_TOP, title.c_str(), MENU_TITLE_COLOR);
+
+  lcdSetColor(g_eeGeneral.themeData.options[0].unsignedValue);
+  dc->drawSolidFilledRect(1, PAGE_LINE_HEIGHT + 1, width() - 3, height() - PAGE_LINE_HEIGHT - 3, CUSTOM_COLOR);
+}
+
 #define ALERT_FRAME_TOP           70
 #define ALERT_FRAME_PADDING       10
 #define ALERT_BITMAP_PADDING      15
@@ -31,13 +52,10 @@
 #define ALERT_ACTION_TOP          230
 #define ALERT_BUTTON_TOP          300
 
-Dialog::Dialog(uint8_t type, std::string title, std::string message, std::function<void(void)> confirmHandler):
-  Window(&mainWindow, {0, 0, LCD_W, LCD_H}, OPAQUE),
+FullScreenDialog::FullScreenDialog(uint8_t type, std::string title, std::string message, std::function<void(void)> confirmHandler):
+  Dialog(title, {0, 0, LCD_W, LCD_H}),
   type(type),
-  title(std::move(title)),
-  message(std::move(message)),
-  confirmHandler(confirmHandler),
-  previousFocus(focusWindow)
+  message(std::move(message))
 {
 #if defined(HARDWARE_TOUCH)
   new FabIconButton(this, LCD_W - 50, ALERT_BUTTON_TOP, ICON_NEXT,
@@ -47,15 +65,13 @@ Dialog::Dialog(uint8_t type, std::string title, std::string message, std::functi
                       return 0;
                     });
 #endif
-  bringToTop();
-  setFocus();
 }
 
-Dialog::~Dialog()
+FullScreenDialog::~FullScreenDialog()
 {
 }
 
-void Dialog::paint(BitmapBuffer * dc)
+void FullScreenDialog::paint(BitmapBuffer * dc)
 {
   theme->drawBackground(dc);
 
@@ -91,7 +107,7 @@ void Dialog::paint(BitmapBuffer * dc)
 }
 
 #if defined(HARDWARE_KEYS)
-void Dialog::onKeyEvent(event_t event)
+void FullScreenDialog::onKeyEvent(event_t event)
 {
   TRACE_WINDOWS("%s received event 0x%X", getWindowDebugString().c_str(), event);
 
@@ -107,7 +123,7 @@ void Dialog::onKeyEvent(event_t event)
 #endif
 
 #if defined(HARDWARE_TOUCH)
-bool Dialog::onTouchEnd(coord_t x, coord_t y)
+bool FullScreenDialog::onTouchEnd(coord_t x, coord_t y)
 {
   Window::onTouchEnd(x, y);
   deleteLater();
@@ -115,7 +131,7 @@ bool Dialog::onTouchEnd(coord_t x, coord_t y)
 }
 #endif
 
-void Dialog::checkEvents()
+void FullScreenDialog::checkEvents()
 {
   Window::checkEvents();
   if (closeCondition && closeCondition()) {
@@ -123,7 +139,7 @@ void Dialog::checkEvents()
   }
 }
 
-void Dialog::deleteLater()
+void FullScreenDialog::deleteLater()
 {
   if (previousFocus) {
     previousFocus->setFocus();
@@ -136,7 +152,7 @@ void Dialog::deleteLater()
   }
 }
 
-void Dialog::runForever()
+void FullScreenDialog::runForever()
 {
   running = true;
 
@@ -160,15 +176,14 @@ void Dialog::runForever()
   Window::deleteLater();
 }
 
-void raiseAlert(const char * title, const char * msg, const char * info, uint8_t sound)
+void showPopup(uint8_t type, const char * title, const char * msg, const char * info)
 {
-  AUDIO_ERROR_MESSAGE(sound);
-  auto dialog = new Dialog(WARNING_TYPE_ALERT, title, msg);
+  auto dialog = new FullScreenDialog(type, title, msg);
   dialog->runForever();
 }
 
-void showPopup(uint8_t type, const char * title, const char * msg, const char * info)
+void raiseAlert(const char * title, const char * msg, const char * info, uint8_t sound)
 {
-  auto dialog = new Dialog(type, title, msg);
-  dialog->runForever();
+  AUDIO_ERROR_MESSAGE(sound);
+  showPopup(WARNING_TYPE_ALERT, title, msg, nullptr);
 }

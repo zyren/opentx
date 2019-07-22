@@ -153,6 +153,30 @@ FailSafeMenu::FailSafeMenu(uint8_t moduleIndex) :
   addTab(new FailSafePage(moduleIndex));
 }
 
+class RegisterDialog: public Dialog {
+  public:
+    RegisterDialog():
+      Dialog(STR_REGISTER, {50, 50, LCD_W - 100, LCD_H - 100})
+    {
+      FormGridLayout grid;
+      grid.spacer(PAGE_LINE_HEIGHT + 8);
+
+      // Name
+      new StaticText(this, grid.getLabelSlot(), STR_NAME);
+      auto edit = new TextEdit(this, grid.getFieldSlot(), g_model.modelRegistrationID, sizeof(g_model.modelRegistrationID));
+      edit->setFocus();
+      grid.nextLine();
+//
+//      // Offset
+//      new StaticText(window, grid.getLabelSlot(), TR_LIMITS_HEADERS_SUBTRIM);
+//      new NumberEdit(window, grid.getFieldSlot(), -1000, +1000, GET_SET_DEFAULT(output->offset), PREC1);
+//      grid.nextLine();
+    }
+
+  protected:
+
+};
+
 class ModuleWindow : public Window {
   public:
     ModuleWindow(Window * parent, const rect_t &rect, uint8_t moduleIndex) :
@@ -378,17 +402,20 @@ class ModuleWindow : public Window {
         new StaticText(this, grid.getLabelSlot(true), STR_MODULE);
         registerButton = new TextButton(this, grid.getFieldSlot(2, 0), STR_REGISTER);
         registerButton->setPressHandler([=]() -> uint8_t {
-            if (moduleState[moduleIndex].mode == MODULE_MODE_RANGECHECK) {
-              rangeButton->check(false);
-            }
-            if (moduleState[moduleIndex].mode == MODULE_MODE_REGISTER) {
-              moduleState[moduleIndex].mode = MODULE_MODE_NORMAL;
-              return 0;
-            }
-            else {
-              moduleState[moduleIndex].mode = MODULE_MODE_REGISTER;
-              return 1;
-            }
+          auto dialog = new RegisterDialog();
+
+//
+//            if (moduleState[moduleIndex].mode == MODULE_MODE_RANGECHECK) {
+//              rangeButton->check(false);
+//            }
+//            if (moduleState[moduleIndex].mode == MODULE_MODE_REGISTER) {
+//              moduleState[moduleIndex].mode = MODULE_MODE_NORMAL;
+//              return 0;
+//            }
+//            else {
+//              moduleState[moduleIndex].mode = MODULE_MODE_REGISTER;
+//              return 1;
+//            }
         });
         registerButton->setCheckHandler([=]() {
             if (moduleState[moduleIndex].mode != MODULE_MODE_REGISTER) {

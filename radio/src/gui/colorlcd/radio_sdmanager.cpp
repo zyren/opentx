@@ -95,11 +95,11 @@ class FilePreview : public Window
     BitmapBuffer *bitmap = nullptr;
 };
 
-class FlashModuleDialog: public Dialog
+class FlashModuleDialog: public FullScreenDialog
 {
   public:
     FlashModuleDialog(ModuleIndex module):
-      Dialog(WARNING_TYPE_INFO, "Flash device"),
+      FullScreenDialog(WARNING_TYPE_INFO, "Flash device"),
       device(module),
       progress(this, {100, 100, 100, 15})
     {

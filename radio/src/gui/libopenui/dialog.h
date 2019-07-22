@@ -31,16 +31,28 @@ enum DialogType {
   WARNING_TYPE_INFO
 };
 
-class Dialog : public Window {
+class Dialog: public Window {
   public:
-    Dialog(uint8_t type, std::string title, std::string message="", std::function<void(void)> confirmHandler=nullptr);
+    Dialog(std::string title, const rect_t rect);
 
-    ~Dialog() override;
+    void paint(BitmapBuffer * dc) override;
+
+  protected:
+    std::string title;
+    std::function<void(void)> confirmHandler;
+    Window * previousFocus;
+};
+
+class FullScreenDialog : public Dialog {
+  public:
+    FullScreenDialog(uint8_t type, std::string title, std::string message="", std::function<void(void)> confirmHandler=nullptr);
+
+    ~FullScreenDialog() override;
 
 #if defined(TRACE_WINDOWS_ENABLED)
     std::string getName() override
     {
-      return "Dialog";
+      return "FullScreenDialog";
     }
 #endif
 
@@ -73,12 +85,9 @@ class Dialog : public Window {
 
   protected:
     uint8_t type;
-    std::string title;
     std::string message;
     bool running = false;
     std::function<bool(void)> closeCondition;
-    std::function<void(void)> confirmHandler;
-    Window * previousFocus;
 };
 
 #endif // _CONFIRMATION_H_

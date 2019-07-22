@@ -129,6 +129,12 @@ class Window {
 
     void setFocus();
 
+    void setRect(rect_t rect)
+    {
+      this->rect = rect;
+      invalidate();
+    }
+
     void setWidth(coord_t value)
     {
       rect.w = value;
