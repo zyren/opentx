@@ -28,7 +28,7 @@ class Choice : public FormField {
   public:
     Choice(Window * parent, const rect_t & rect, const char * values, int16_t vmin, int16_t vmax, std::function<int16_t()> getValue, std::function<void(int16_t)> setValue = nullptr, LcdFlags flags = 0);
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
       return "Choice";

@@ -32,7 +32,7 @@ class NumberKeyboard : public Keyboard<BaseNumberEdit> {
 
     ~NumberKeyboard() override;
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
       return "NumberKeyboard";

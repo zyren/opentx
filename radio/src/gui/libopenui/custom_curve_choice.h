@@ -28,7 +28,7 @@ class CustomCurveChoice : public FormField {
   public:
     CustomCurveChoice(Window * parent, const rect_t & rect, int16_t vmin, int16_t vmax, std::function<int16_t()> getValue, std::function<void(int16_t)> setValue, LcdFlags flags = 0);
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
       return "CustomCurveChoice";

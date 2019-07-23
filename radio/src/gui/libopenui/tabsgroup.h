@@ -76,7 +76,7 @@ class TabsCarousel: public Window {
   public:
     TabsCarousel(Window * parent, TabsGroup * menu);
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
       return "TabsCarousel";
@@ -113,7 +113,7 @@ class TabsGroupHeader: public Window {
   public:
     TabsGroupHeader(TabsGroup * menu, uint8_t icon);
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
       return "TabsGroupHeader";
@@ -144,7 +144,7 @@ class TabsGroup: public Window {
 
     ~TabsGroup();
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
       return "TabsGroup";

@@ -34,7 +34,7 @@ class StaticText : public Window {
     {
     }
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
       return "StaticText \"" + text + "\"";
@@ -75,7 +75,7 @@ class Subtitle: public StaticText {
     {
     }
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
       return "Subtitle \"" + text + "\"";
@@ -97,7 +97,7 @@ class StaticBitmap: public Window {
     {
     }
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
       return "StaticBitmap";

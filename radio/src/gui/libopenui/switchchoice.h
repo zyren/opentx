@@ -39,7 +39,7 @@ class SwitchChoice : public FormField {
     {
     }
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
       return "SwitchChoice";

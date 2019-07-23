@@ -66,7 +66,7 @@ uint8_t auxSerialTracesEnabled();
 #define TRACE_WARNING_WP(...) debugPrintf(__VA_ARGS__)
 #define TRACE_ERROR(...)      debugPrintf("-E- " __VA_ARGS__)
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
 #define TRACE_WINDOWS(f_, ...)    debugPrintf((f_ "\r\n"), ##__VA_ARGS__)
 #else
 #define TRACE_WINDOWS(...)

@@ -230,11 +230,30 @@ class RegisterDialog: public Dialog {
 
 class BindWaitDialog: public Dialog {
   public:
-    BindWaitDialog(uint8_t moduleIdx):
+    BindWaitDialog(uint8_t moduleIdx, uint8_t receiverIdx):
       Dialog(STR_BIND, {50, 73, LCD_W - 100, LCD_H - 146}),
       moduleIdx(moduleIdx)
     {
       new StaticText(this, {0, height() / 2, width(), PAGE_LINE_HEIGHT}, STR_WAITING_FOR_RX, CENTERED);
+
+      startBind();
+    }
+
+    void startBind()
+    {
+      memclear(&reusableBuffer.moduleSetup.bindInformation, sizeof(BindInformation));
+      reusableBuffer.moduleSetup.bindInformation.rxUid = receiverIdx;
+      if (isModuleR9MAccess(moduleIdx)) {
+#if defined(SIMU)
+        reusableBuffer.moduleSetup.pxx2.moduleInformation.information.modelID = 1;
+        reusableBuffer.moduleSetup.pxx2.moduleInformation.information.variant = 2;
+#else
+        moduleState[moduleIdx].readModuleInformation(&reusableBuffer.moduleSetup.pxx2.moduleInformation, PXX2_HW_INFO_TX_ID, PXX2_HW_INFO_TX_ID);
+#endif
+      }
+      else {
+        moduleState[moduleIdx].startBind(&reusableBuffer.moduleSetup.bindInformation);
+      }
     }
 
     void checkEvents() override
@@ -242,8 +261,26 @@ class BindWaitDialog: public Dialog {
       Dialog::checkEvents();
     }
 
+    void deleteLater()
+    {
+      moduleState[moduleIdx].mode = 0;
+      // TODO removePXX2ReceiverIfEmpty(moduleIdx, receiverIdx);
+    }
+
+#if defined(HARDWARE_KEYS)
+    void onKeyEvent(event_t event) override
+    {
+      TRACE_WINDOWS("%s received event 0x%X", getWindowDebugString().c_str(), event);
+
+      if (event == EVT_KEY_BREAK(KEY_EXIT)) {
+        deleteLater();
+      }
+    }
+#endif
+
   protected:
     uint8_t moduleIdx;
+    uint8_t receiverIdx;
 };
 
 class ModuleWindow : public Window {
@@ -521,7 +558,7 @@ class ModuleWindow : public Window {
           }
           else {
             new TextButton(this, grid.getFieldSlot(2, 0), STR_BIND, [=]() {
-              new BindWaitDialog(moduleIdx);
+              new BindWaitDialog(moduleIdx, receiverIdx);
                 return 0;
             });
           }

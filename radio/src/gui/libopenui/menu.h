@@ -56,7 +56,7 @@ class MenuWindow: public Window {
   public:
     MenuWindow(Menu * parent);
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
       return "MenuWindow";
@@ -124,7 +124,7 @@ class Menu : public Window {
       Window::deleteLater();
     }
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
       return "Menu";

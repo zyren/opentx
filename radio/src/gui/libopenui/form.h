@@ -100,7 +100,7 @@ class FormGroup: public FormField {
       FormField::current = nullptr;
     }
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
       return "FormGroup";
@@ -147,7 +147,7 @@ class FormWindow: public FormGroup {
     {
     }
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
       return "FormWindow";

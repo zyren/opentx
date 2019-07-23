@@ -45,7 +45,7 @@ class Page: public Window {
 
     ~Page() override;
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
     std::string getName() override
     {
       return "Page";

@@ -52,7 +52,7 @@ class Window {
 
     virtual ~Window();
 
-#if defined(TRACE_WINDOWS_ENABLED)
+#if defined(DEBUG_WINDOWS)
     virtual std::string getName()
     {
       return "Window";

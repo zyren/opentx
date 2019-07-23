@@ -57,13 +57,11 @@ class FilePreview : public Window
     {
     }
 
-#if defined(TRACE_WINDOWS_ENABLED)
-
+#if defined(DEBUG_WINDOWS)
     virtual std::string getName()
     {
       return "FilePreview";
     }
-
 #endif
 
     void setFile(const char *filename)
