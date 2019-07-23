@@ -228,6 +228,24 @@ class RegisterDialog: public Dialog {
     TextButton * exitButton;
 };
 
+class BindWaitDialog: public Dialog {
+  public:
+    BindWaitDialog(uint8_t moduleIdx):
+      Dialog(STR_BIND, {50, 73, LCD_W - 100, LCD_H - 146}),
+      moduleIdx(moduleIdx)
+    {
+      new StaticText(this, {0, height() / 2, width(), PAGE_LINE_HEIGHT}, STR_WAITING_FOR_RX, CENTERED);
+    }
+
+    void checkEvents() override
+    {
+      Dialog::checkEvents();
+    }
+
+  protected:
+    uint8_t moduleIdx;
+};
+
 class ModuleWindow : public Window {
   public:
     ModuleWindow(Window * parent, const rect_t &rect, uint8_t moduleIdx) :
@@ -503,6 +521,7 @@ class ModuleWindow : public Window {
           }
           else {
             new TextButton(this, grid.getFieldSlot(2, 0), STR_BIND, [=]() {
+              new BindWaitDialog(moduleIdx);
                 return 0;
             });
           }
