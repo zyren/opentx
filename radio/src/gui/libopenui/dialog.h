@@ -37,6 +37,8 @@ class Dialog: public Window {
 
     void paint(BitmapBuffer * dc) override;
 
+    void deleteLater();
+
   protected:
     std::string title;
     std::function<void(void)> confirmHandler;

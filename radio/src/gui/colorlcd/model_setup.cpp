@@ -26,9 +26,9 @@
 
 class ChannelFailsafeBargraph: public Window {
   public:
-    ChannelFailsafeBargraph(Window * parent, const rect_t & rect, uint8_t moduleIndex, uint8_t channel):
+    ChannelFailsafeBargraph(Window * parent, const rect_t & rect, uint8_t moduleIdx, uint8_t channel):
       Window(parent, rect),
-      moduleIndex(moduleIndex),
+      moduleIdx(moduleIdx),
       channel(channel)
     {
     }
@@ -59,15 +59,15 @@ class ChannelFailsafeBargraph: public Window {
     }
 
   protected:
-    uint8_t moduleIndex;
+    uint8_t moduleIdx;
     uint8_t channel;
 };
 
 class FailSafeBody : public Window {
   public:
-    FailSafeBody(Window * parent, const rect_t &rect, uint8_t moduleIndex) :
+    FailSafeBody(Window * parent, const rect_t &rect, uint8_t moduleIdx) :
       Window(parent, rect),
-      moduleIndex(moduleIndex)
+      moduleIdx(moduleIdx)
     {
       build();
     }
@@ -85,7 +85,7 @@ class FailSafeBody : public Window {
 
       const int lim = (g_model.extendedLimits ? (512 * LIMIT_EXT_PERCENT / 100) : 512) * 2;
 
-      for (int ch=0; ch < maxModuleChannels(moduleIndex); ch++) {
+      for (int ch=0; ch < maxModuleChannels(moduleIdx); ch++) {
         // Channel name
         // TODO if (g_model.limitData[ch].name[0] != '\0') { <= add channel name
         new StaticText(this, grid.getLabelSlot(), getSourceString(MIXSRC_CH1 + ch));
@@ -97,13 +97,13 @@ class FailSafeBody : public Window {
                        PREC1);
 
         // Channel bargraph
-        new ChannelFailsafeBargraph(this, {150, grid.getWindowHeight(), 150, PAGE_LINE_HEIGHT}, moduleIndex, ch);
+        new ChannelFailsafeBargraph(this, {150, grid.getWindowHeight(), 150, PAGE_LINE_HEIGHT}, moduleIdx, ch);
         grid.nextLine();
       }
 
       auto out2fail = new TextButton(this, grid.getLineSlot(), STR_CHANNELS2FAILSAFE);
       out2fail->setPressHandler([=]() {
-        setCustomFailsafe(moduleIndex);
+        setCustomFailsafe(moduleIdx);
         storageDirty(EE_MODEL);
         return 0;
       });
@@ -113,7 +113,7 @@ class FailSafeBody : public Window {
     }
 
   protected:
-    uint8_t moduleIndex;
+    uint8_t moduleIdx;
 };
 
 class FailSafeFooter : public Window {
@@ -130,33 +130,34 @@ class FailSafeFooter : public Window {
 
 class FailSafePage : public PageTab {
   public:
-    FailSafePage(uint8_t moduleIndex) :
+    FailSafePage(uint8_t moduleIdx) :
       PageTab("FAILSAFE", ICON_STATS_ANALOGS),
-      moduleIndex(moduleIndex)
+      moduleIdx(moduleIdx)
     {
     }
 
     void build(FormWindow * window) override
     {
-      new FailSafeBody(window, {0, 0, LCD_W, window->height() - footerHeight}, moduleIndex );
+      new FailSafeBody(window, {0, 0, LCD_W, window->height() - footerHeight}, moduleIdx );
       new FailSafeFooter(window, {0, window->height() - footerHeight, LCD_W, footerHeight});
     }
 
   protected:
     static constexpr coord_t footerHeight = 30;
-    uint8_t moduleIndex;
+    uint8_t moduleIdx;
 };
 
-FailSafeMenu::FailSafeMenu(uint8_t moduleIndex) :
+FailSafeMenu::FailSafeMenu(uint8_t moduleIdx) :
   TabsGroup(ICON_MODEL)
 {
-  addTab(new FailSafePage(moduleIndex));
+  addTab(new FailSafePage(moduleIdx));
 }
 
 class RegisterDialog: public Dialog {
   public:
-    RegisterDialog():
-      Dialog(STR_REGISTER, {50, 73, LCD_W - 100, LCD_H - 146})
+    RegisterDialog(uint8_t moduleIdx):
+      Dialog(STR_REGISTER, {50, 73, LCD_W - 100, LCD_H - 146}),
+      moduleIdx(moduleIdx)
     {
       FormGridLayout grid(width());
       grid.setLabelWidth(150);
@@ -174,51 +175,45 @@ class RegisterDialog: public Dialog {
 
       // RX name
       new StaticText(this, grid.getLabelSlot(), STR_RX_NAME);
-//      if (reusableBuffer.moduleSetup.pxx2.registerStep < REGISTER_RX_NAME_RECEIVED) {
       waiting = new StaticText(this, grid.getFieldSlot(), STR_WAITING);
       grid.nextLine();
       grid.spacer(6);
 
-      // edit = new TextEdit(this, grid.getFieldSlot(), reusableBuffer.moduleSetup.pxx2.registerRxName, PXX2_LEN_RX_NAME);
-
-
-//        lcdDrawText(WARNING_LINE_X, WARNING_LINE_Y - 4 + 2 * FH, STR_WAITING);
-//        lcdDrawText(WARNING_LINE_X, WARNING_LINE_Y - 2 + 3 * FH, TR_EXIT, menuVerticalPosition == ITEM_REGISTER_BUTTONS ? INVERS : 0);
-//      }
-//      else {
-//        lcdDrawText(WARNING_LINE_X, WARNING_LINE_Y - 4 + 2 * FH, STR_RX_NAME);
-//        editName(WARNING_LINE_X + 8*FW, WARNING_LINE_Y - 4 + 2 * FH, reusableBuffer.moduleSetup.pxx2.registerRxName, PXX2_LEN_RX_NAME, event, menuVerticalPosition == ITEM_REGISTER_RECEIVER_NAME);
-//        lcdDrawText(WARNING_LINE_X, WARNING_LINE_Y - 2 + 3 * FH, TR_ENTER, menuVerticalPosition == ITEM_REGISTER_BUTTONS && menuHorizontalPosition == 0 ? INVERS : 0);
-//        lcdDrawText(WARNING_LINE_X + 8*FW, WARNING_LINE_Y - 2 + 3 * FH, TR_EXIT, menuVerticalPosition == ITEM_REGISTER_BUTTONS && menuHorizontalPosition == 1 ? INVERS : 0);
-//      }
-
       // Buttons
       exitButton = new TextButton(this, grid.getLabelSlot(), "EXIT",
                                    [=]() -> int8_t {
-                                       reusableBuffer.moduleSetup.pxx2.registerStep = REGISTER_RX_NAME_RECEIVED;
+                                       this->deleteLater();
                                        return 0;
                                    });
       exitButton->setFocus();
       FormField::link(exitButton, edit);
+
+      startRegister();
+    }
+
+    void startRegister()
+    {
+      memclear(&reusableBuffer.moduleSetup.pxx2, sizeof(reusableBuffer.moduleSetup.pxx2));
+      moduleState[moduleIdx].mode = MODULE_MODE_REGISTER;
     }
 
     void checkEvents() override
     {
-      if (reusableBuffer.moduleSetup.pxx2.registerStep >= REGISTER_RX_NAME_RECEIVED && !rxName) {
+      if (!rxName && reusableBuffer.moduleSetup.pxx2.registerStep >= REGISTER_RX_NAME_RECEIVED) {
         rect_t rect = waiting->getRect();
         waiting->deleteLater();
+        FormField::clearCurrentField();
         rxName = new TextEdit(this, rect, reusableBuffer.moduleSetup.pxx2.registerRxName, PXX2_LEN_RX_NAME);
         rect = exitButton->getRect();
         auto okButton = new TextButton(this, rect, "OK",
                                     [=]() -> int8_t {
-
+                                        reusableBuffer.moduleSetup.pxx2.registerStep = REGISTER_RX_NAME_SELECTED;
                                         return 0;
                                     });
         exitButton->setLeft(left() + rect.w + 10);
         FormField::link(uid, rxName);
         FormField::link(rxName, okButton);
         FormField::link(okButton, exitButton);
-        // FormField::link(exitButton, getFirstField());
         okButton->setFocus();
       }
 
@@ -226,6 +221,7 @@ class RegisterDialog: public Dialog {
     }
 
   protected:
+    uint8_t moduleIdx;
     NumberEdit * uid;
     StaticText * waiting;
     TextEdit * rxName = nullptr;
@@ -234,9 +230,9 @@ class RegisterDialog: public Dialog {
 
 class ModuleWindow : public Window {
   public:
-    ModuleWindow(Window * parent, const rect_t &rect, uint8_t moduleIndex) :
+    ModuleWindow(Window * parent, const rect_t &rect, uint8_t moduleIdx) :
       Window(parent, rect, FORWARD_SCROLL),
-      moduleIndex(moduleIndex)
+      moduleIdx(moduleIdx)
     {
       update();
     }
@@ -247,7 +243,7 @@ class ModuleWindow : public Window {
     }
 
   protected:
-    uint8_t moduleIndex;
+    uint8_t moduleIdx;
     Choice * moduleChoice = nullptr;
     Choice * rfChoice = nullptr;
     FormField * lastField = nullptr; // moduleChoice is always the firstField
@@ -256,17 +252,17 @@ class ModuleWindow : public Window {
     TextButton * registerButton = nullptr;
     Choice * failSafeChoice = nullptr;
 
-    void addChannelRange(FormGridLayout &grid, uint8_t moduleIndex)
+    void addChannelRange(FormGridLayout &grid, uint8_t moduleIdx)
     {
       new StaticText(this, grid.getLabelSlot(true), STR_CHANNELRANGE);
       auto channelStart = new NumberEdit(this, grid.getFieldSlot(2, 0), 1,
-                                         MAX_OUTPUT_CHANNELS - sentModuleChannels(moduleIndex) + 1,
-                                         GET_DEFAULT(1 + g_model.moduleData[moduleIndex].channelsStart));
+                                         MAX_OUTPUT_CHANNELS - sentModuleChannels(moduleIdx) + 1,
+                                         GET_DEFAULT(1 + g_model.moduleData[moduleIdx].channelsStart));
       auto channelEnd = new NumberEdit(this, grid.getFieldSlot(2, 1),
-                                       g_model.moduleData[moduleIndex].channelsStart + minModuleChannels(moduleIndex),
-                                       min<int8_t>(MAX_OUTPUT_CHANNELS, g_model.moduleData[moduleIndex].channelsStart + maxModuleChannels(moduleIndex)),
-                                       GET_DEFAULT(g_model.moduleData[moduleIndex].channelsStart + 8 + g_model.moduleData[moduleIndex].channelsCount));
-      if (isModulePXX2(moduleIndex)) {
+                                       g_model.moduleData[moduleIdx].channelsStart + minModuleChannels(moduleIdx),
+                                       min<int8_t>(MAX_OUTPUT_CHANNELS, g_model.moduleData[moduleIdx].channelsStart + maxModuleChannels(moduleIdx)),
+                                       GET_DEFAULT(g_model.moduleData[moduleIdx].channelsStart + 8 + g_model.moduleData[moduleIdx].channelsCount));
+      if (isModulePXX2(moduleIdx)) {
         channelEnd->setAvailableHandler([=](int value) {
             return isPxx2IsrmChannelsCountAllowed(value - 8);
         });
@@ -274,18 +270,18 @@ class ModuleWindow : public Window {
       channelStart->setPrefix(STR_CH);
       channelEnd->setPrefix(STR_CH);
       channelStart->setSetValueHandler([=](int32_t newValue) {
-        g_model.moduleData[moduleIndex].channelsStart = newValue - 1;
+        g_model.moduleData[moduleIdx].channelsStart = newValue - 1;
         SET_DIRTY();
-        channelEnd->setMin(g_model.moduleData[moduleIndex].channelsStart + minModuleChannels(moduleIndex));
-        channelEnd->setMax(min<int8_t>(MAX_OUTPUT_CHANNELS, g_model.moduleData[moduleIndex].channelsStart + maxModuleChannels(moduleIndex)));
+        channelEnd->setMin(g_model.moduleData[moduleIdx].channelsStart + minModuleChannels(moduleIdx));
+        channelEnd->setMax(min<int8_t>(MAX_OUTPUT_CHANNELS, g_model.moduleData[moduleIdx].channelsStart + maxModuleChannels(moduleIdx)));
         channelEnd->invalidate();
       });
       channelEnd->setSetValueHandler([=](int32_t newValue) {
-        g_model.moduleData[moduleIndex].channelsCount = newValue - g_model.moduleData[moduleIndex].channelsStart - 8;
+        g_model.moduleData[moduleIdx].channelsCount = newValue - g_model.moduleData[moduleIdx].channelsStart - 8;
         SET_DIRTY();
-        channelStart->setMax(MAX_OUTPUT_CHANNELS - sentModuleChannels(moduleIndex) + 1);
+        channelStart->setMax(MAX_OUTPUT_CHANNELS - sentModuleChannels(moduleIdx) + 1);
       });
-      channelEnd->enable(minModuleChannels(moduleIndex) < maxModuleChannels(moduleIndex));
+      channelEnd->enable(minModuleChannels(moduleIdx) < maxModuleChannels(moduleIdx));
     }
 
     void update()
@@ -302,11 +298,11 @@ class ModuleWindow : public Window {
       new StaticText(this, grid.getLabelSlot(true), STR_MODE);
       moduleChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_INTERNAL_MODULE_PROTOCOLS,
                                 MODULE_TYPE_NONE, MODULE_TYPE_COUNT - 1,
-                                GET_DEFAULT(g_model.moduleData[moduleIndex].type),
+                                GET_DEFAULT(g_model.moduleData[moduleIdx].type),
                                 [=](int32_t newValue) {
-                                  g_model.moduleData[moduleIndex].type = newValue;
+                                  g_model.moduleData[moduleIdx].type = newValue;
                                   SET_DIRTY();
-                                  // TODO resetModuleSettings(moduleIndex);
+                                  // TODO resetModuleSettings(moduleIdx);
                                   update();
                                   moduleChoice->setFocus();
                                 });
@@ -316,32 +312,32 @@ class ModuleWindow : public Window {
       FormField::link(previousField, moduleChoice);
 
       // Module parameters
-      if (isModuleXJT(moduleIndex)) {
+      if (isModuleXJT(moduleIdx)) {
         auto xjtChoice = new Choice(this, grid.getFieldSlot(2, 1), STR_XJT_ACCST_RF_PROTOCOLS, MODULE_SUBTYPE_PXX1_OFF, MODULE_SUBTYPE_PXX1_ACCST_LR12,
-                                    GET_SET_DEFAULT(g_model.moduleData[moduleIndex].rfProtocol));
+                                    GET_SET_DEFAULT(g_model.moduleData[moduleIdx].rfProtocol));
         xjtChoice->setAvailableHandler([](int index) {
           return index != MODULE_SUBTYPE_PXX1_OFF;
         });
       }
-      else if (isModuleDSM2(moduleIndex)) {
+      else if (isModuleDSM2(moduleIdx)) {
         new Choice(this, grid.getFieldSlot(2, 1), STR_DSM_PROTOCOLS, DSM2_PROTO_LP45, DSM2_PROTO_DSMX,
-                   GET_SET_DEFAULT(g_model.moduleData[moduleIndex].rfProtocol));
+                   GET_SET_DEFAULT(g_model.moduleData[moduleIdx].rfProtocol));
       }
-      else if (isModuleR9M(moduleIndex)) {
+      else if (isModuleR9M(moduleIdx)) {
         rfChoice = new Choice(this, grid.getFieldSlot(2, 1), STR_R9M_REGION, MODULE_SUBTYPE_R9M_FCC, MODULE_SUBTYPE_R9M_EU,
-                              GET_DEFAULT(g_model.moduleData[moduleIndex].subType),
+                              GET_DEFAULT(g_model.moduleData[moduleIdx].subType),
                               [=](int32_t newValue) {
-                                  g_model.moduleData[moduleIndex].subType = newValue;
+                                  g_model.moduleData[moduleIdx].subType = newValue;
                                   SET_DIRTY();
                                   update();
                                   rfChoice->setFocus();
                               });
       }
-      else if (isModulePXX2(moduleIndex)) {
+      else if (isModulePXX2(moduleIdx)) {
         rfChoice = new Choice(this, grid.getFieldSlot(2, 1), STR_ISRM_RF_PROTOCOLS, 0, MODULE_SUBTYPE_ISRM_PXX2_ACCST_LR12,
-                              GET_DEFAULT(g_model.moduleData[moduleIndex].subType),
+                              GET_DEFAULT(g_model.moduleData[moduleIdx].subType),
                               [=](int32_t newValue) {
-                                  g_model.moduleData[moduleIndex].subType = newValue;
+                                  g_model.moduleData[moduleIdx].subType = newValue;
                                   SET_DIRTY();
                                   update();
                                   rfChoice->setFocus();
@@ -350,62 +346,62 @@ class ModuleWindow : public Window {
       grid.nextLine();
 
       // Channel Range
-      if (g_model.moduleData[moduleIndex].type != MODULE_TYPE_NONE) {
-        addChannelRange(grid, moduleIndex); //TODO XJT2 should only set channel count of 8/16/24
+      if (g_model.moduleData[moduleIdx].type != MODULE_TYPE_NONE) {
+        addChannelRange(grid, moduleIdx); //TODO XJT2 should only set channel count of 8/16/24
         grid.nextLine();
       }
 
       // PPM modules
-      if (isModulePPM(moduleIndex)) {
+      if (isModulePPM(moduleIdx)) {
         // PPM frame
         new StaticText(this, grid.getLabelSlot(true), STR_PPMFRAME);
 
         // PPM frame length
         auto edit = new NumberEdit(this, grid.getFieldSlot(2, 0), 125, 35 * 5 + 225,
-                                   GET_DEFAULT(g_model.moduleData[moduleIndex].ppm.frameLength * 5 + 225),
-                                   SET_VALUE(g_model.moduleData[moduleIndex].ppm.frameLength, (newValue - 225) / 5),
+                                   GET_DEFAULT(g_model.moduleData[moduleIdx].ppm.frameLength * 5 + 225),
+                                   SET_VALUE(g_model.moduleData[moduleIdx].ppm.frameLength, (newValue - 225) / 5),
                                    PREC1);
         edit->setStep(5);
         edit->setSuffix(STR_MS);
 
         // PPM frame delay
         edit = new NumberEdit(this, grid.getFieldSlot(2, 1), 100, 800,
-                              GET_DEFAULT(g_model.moduleData[moduleIndex].ppm.delay * 50 + 300),
-                              SET_VALUE(g_model.moduleData[moduleIndex].ppm.delay, (newValue - 300) / 50));
+                              GET_DEFAULT(g_model.moduleData[moduleIdx].ppm.delay * 50 + 300),
+                              SET_VALUE(g_model.moduleData[moduleIdx].ppm.delay, (newValue - 300) / 50));
         edit->setStep(50);
         edit->setSuffix("us");
         grid.nextLine();
       }
 
       // Model index
-      if (isModuleModelIndexAvailable(moduleIndex)) {
+      if (isModuleModelIndexAvailable(moduleIdx)) {
         new StaticText(this, grid.getLabelSlot(true), STR_RECEIVER_NUM);
-        new NumberEdit(this, grid.getFieldSlot(2, 0), 0, getMaxRxNum(moduleIndex), GET_SET_DEFAULT(g_model.header.modelId[moduleIndex]));
+        new NumberEdit(this, grid.getFieldSlot(2, 0), 0, getMaxRxNum(moduleIdx), GET_SET_DEFAULT(g_model.header.modelId[moduleIdx]));
         grid.nextLine();
       }
 
       // Module parameters
 
       // Bind and Range buttons
-      if (!isModuleRFAccess(moduleIndex) && isModuleBindRangeAvailable(moduleIndex)) {
+      if (!isModuleRFAccess(moduleIdx) && isModuleBindRangeAvailable(moduleIdx)) {
         bindButton = new TextButton(this, grid.getFieldSlot(2, 0), STR_MODULE_BIND);
         bindButton->setPressHandler([=]() -> uint8_t {
-          if (moduleState[moduleIndex].mode == MODULE_MODE_RANGECHECK) {
+          if (moduleState[moduleIdx].mode == MODULE_MODE_RANGECHECK) {
             rangeButton->check(false);
           }
-          if (moduleState[moduleIndex].mode == MODULE_MODE_BIND) {
+          if (moduleState[moduleIdx].mode == MODULE_MODE_BIND) {
             bindButton->setText(STR_MODULE_BIND);
-            moduleState[moduleIndex].mode = MODULE_MODE_NORMAL;
+            moduleState[moduleIdx].mode = MODULE_MODE_NORMAL;
             return 0;
           }
           else {
             bindButton->setText(STR_MODULE_BIND);
-            moduleState[moduleIndex].mode = MODULE_MODE_BIND;
+            moduleState[moduleIdx].mode = MODULE_MODE_BIND;
             return 1;
           }
         });
         bindButton->setCheckHandler([=]() {
-          if (moduleState[moduleIndex].mode != MODULE_MODE_BIND) {
+          if (moduleState[moduleIdx].mode != MODULE_MODE_BIND) {
             bindButton->setText(STR_MODULE_BIND);
             bindButton->check(false);
           }
@@ -413,17 +409,17 @@ class ModuleWindow : public Window {
 
         rangeButton = new TextButton(this, grid.getFieldSlot(2, 1), STR_MODULE_RANGE);
         rangeButton->setPressHandler([=]() -> uint8_t {
-          if (moduleState[moduleIndex].mode == MODULE_MODE_BIND) {
+          if (moduleState[moduleIdx].mode == MODULE_MODE_BIND) {
             bindButton->setText(STR_MODULE_BIND);
             bindButton->check(false);
-            moduleState[moduleIndex].mode = MODULE_MODE_NORMAL;
+            moduleState[moduleIdx].mode = MODULE_MODE_NORMAL;
           }
-          if (moduleState[moduleIndex].mode == MODULE_MODE_RANGECHECK) {
-            moduleState[moduleIndex].mode = MODULE_MODE_NORMAL;
+          if (moduleState[moduleIdx].mode == MODULE_MODE_RANGECHECK) {
+            moduleState[moduleIdx].mode = MODULE_MODE_NORMAL;
             return 0;
           }
           else {
-            moduleState[moduleIndex].mode = MODULE_MODE_RANGECHECK;
+            moduleState[moduleIdx].mode = MODULE_MODE_RANGECHECK;
             return 1;
           }
         });
@@ -432,20 +428,20 @@ class ModuleWindow : public Window {
       }
 
       // Failsafe
-      if (isModuleFailsafeAvailable(moduleIndex)) {
+      if (isModuleFailsafeAvailable(moduleIdx)) {
         new StaticText(this, grid.getLabelSlot(true), STR_FAILSAFE);
         failSafeChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_VFAILSAFE, 0, FAILSAFE_LAST,
-                                    GET_DEFAULT(g_model.moduleData[moduleIndex].failsafeMode),
+                                    GET_DEFAULT(g_model.moduleData[moduleIdx].failsafeMode),
                                     [=](int32_t newValue) {
-                                      g_model.moduleData[moduleIndex].failsafeMode = newValue;
+                                      g_model.moduleData[moduleIdx].failsafeMode = newValue;
                                       SET_DIRTY();
                                       update();
                                       failSafeChoice->setFocus();
                                     });
-        if (g_model.moduleData[moduleIndex].failsafeMode == FAILSAFE_CUSTOM) {
+        if (g_model.moduleData[moduleIdx].failsafeMode == FAILSAFE_CUSTOM) {
           new TextButton(this, grid.getFieldSlot(2, 1), STR_SET,
                          [=]() -> uint8_t {
-                           new FailSafeMenu(moduleIndex);
+                           new FailSafeMenu(moduleIdx);
                            return 1;
                          });
         }
@@ -453,43 +449,22 @@ class ModuleWindow : public Window {
       }
 
       // Register and Range buttons
-      if (isModuleRFAccess(moduleIndex)) {
+      if (isModuleRFAccess(moduleIdx)) {
         new StaticText(this, grid.getLabelSlot(true), STR_MODULE);
         registerButton = new TextButton(this, grid.getFieldSlot(2, 0), STR_REGISTER);
         registerButton->setPressHandler([=]() -> uint8_t {
-          auto dialog = new RegisterDialog();
-
-//
-//            if (moduleState[moduleIndex].mode == MODULE_MODE_RANGECHECK) {
-//              rangeButton->check(false);
-//            }
-//            if (moduleState[moduleIndex].mode == MODULE_MODE_REGISTER) {
-//              moduleState[moduleIndex].mode = MODULE_MODE_NORMAL;
-//              return 0;
-//            }
-//            else {
-//              moduleState[moduleIndex].mode = MODULE_MODE_REGISTER;
-//              return 1;
-//            }
-        });
-        registerButton->setCheckHandler([=]() {
-            if (moduleState[moduleIndex].mode != MODULE_MODE_REGISTER) {
-              registerButton->check(false);
-            }
+            new RegisterDialog(moduleIdx);
+            return 0;
         });
 
         rangeButton = new TextButton(this, grid.getFieldSlot(2, 1), STR_MODULE_RANGE);
         rangeButton->setPressHandler([=]() -> uint8_t {
-            if (moduleState[moduleIndex].mode == MODULE_MODE_REGISTER) {
-              registerButton->check(false);
-              moduleState[moduleIndex].mode = MODULE_MODE_NORMAL;
-            }
-            if (moduleState[moduleIndex].mode == MODULE_MODE_RANGECHECK) {
-              moduleState[moduleIndex].mode = MODULE_MODE_NORMAL;
+            if (moduleState[moduleIdx].mode == MODULE_MODE_RANGECHECK) {
+              moduleState[moduleIdx].mode = MODULE_MODE_NORMAL;
               return 0;
             }
             else {
-              moduleState[moduleIndex].mode = MODULE_MODE_RANGECHECK;
+              moduleState[moduleIdx].mode = MODULE_MODE_RANGECHECK;
               return 1;
             }
         });
@@ -498,73 +473,39 @@ class ModuleWindow : public Window {
       }
 
       // R9M Power
-      if (isModuleR9M_FCC(moduleIndex)) {
+      if (isModuleR9M_FCC(moduleIdx)) {
         new StaticText(this, grid.getLabelSlot(true), STR_RFPOWER);
         new Choice(this, grid.getFieldSlot(), STR_R9M_FCC_POWER_VALUES, 0, R9M_FCC_POWER_MAX,
-                   GET_SET_DEFAULT(g_model.moduleData[moduleIndex].pxx.power));
+                   GET_SET_DEFAULT(g_model.moduleData[moduleIdx].pxx.power));
       }
 
-      if (isModuleR9M_LBT(moduleIndex)) {
+      if (isModuleR9M_LBT(moduleIdx)) {
         new StaticText(this, grid.getLabelSlot(true), STR_RFPOWER);
         new Choice(this, grid.getFieldSlot(), STR_R9M_LBT_POWER_VALUES, 0, R9M_LBT_POWER_MAX,
-                   GET_DEFAULT(min<uint8_t>(g_model.moduleData[moduleIndex].pxx.power, R9M_LBT_POWER_MAX)),
-                   SET_DEFAULT(g_model.moduleData[moduleIndex].pxx.power));
+                   GET_DEFAULT(min<uint8_t>(g_model.moduleData[moduleIdx].pxx.power, R9M_LBT_POWER_MAX)),
+                   SET_DEFAULT(g_model.moduleData[moduleIdx].pxx.power));
       }
 
       // Receivers
-      if (isModulePXX2(moduleIndex)) {
-        uint8_t receiverCount = 0;
-        while (receiverCount < PXX2_MAX_RECEIVERS_PER_MODULE) {
-          uint8_t receiverSlot = 0; // g_model.moduleData[moduleIndex].pxx2.getReceiverSlot(receiverCount);
-          if (receiverSlot--) {
-            // Label + Delete and set pinmap buttons
-            char label[sizeof(TR_RECEIVER) + 2] = "";
-            memcpy(label, STR_RECEIVER, sizeof(TR_RECEIVER));
-            label[sizeof(label) - 3] = ' ';
-            label[sizeof(label) - 2] = '1' + receiverCount;
-            new Subtitle(this, grid.getLabelSlot(true), label);
-            new TextButton(this, grid.getFieldSlot(2, 0), "Pin map", [=]() {
-                // TODO PINMAP SCREEN
+      if (isModulePXX2(moduleIdx)) {
+        for (uint8_t receiverIdx = 0; receiverIdx < PXX2_MAX_RECEIVERS_PER_MODULE; receiverIdx++) {
+          char label[] = TR_RECEIVER " X";
+          label[sizeof(label) - 2] = '1' + receiverIdx;
+          new StaticText(this, grid.getLabelSlot(true), label);
+          if (g_model.moduleData[moduleIdx].pxx2.receiverName[receiverIdx][0] != '\0') {
+            char receiverName[PXX2_LEN_RX_NAME + 1];
+            memset(receiverName, 0, sizeof(receiverName));
+            strncpy(receiverName, g_model.moduleData[moduleIdx].pxx2.receiverName[receiverIdx],
+                    effectiveLen(g_model.moduleData[moduleIdx].pxx2.receiverName[receiverIdx], PXX2_LEN_RX_NAME));
+            new TextButton(this, grid.getFieldSlot(2, 0), receiverName, [=]() {
                 return 0;
             });
-            new TextButton(this, grid.getFieldSlot(2, 1), STR_DELETE, [=]() {
-                // TODO pxx2DeleteReceiver(moduleIndex, receiverCount);
-                update();
-                failSafeChoice->setFocus(); // TODO lazy
-                return 0;
-            });
-            grid.nextLine();
-
-            // Receiver name + Bind and share buttons
-            // TODO new StaticText(this, grid.getLabelSlot(true), " Telemetry");
-            new TextButton(this, grid.getFieldSlot(2, 0), STR_MODULE_BIND, [=]() {
-                reusableBuffer.moduleSetup.bindInformation.step = BIND_START;
-                reusableBuffer.moduleSetup.bindInformation.candidateReceiversCount = 0;
-                // TODO reusableBuffer.moduleSetup.pxx2.bindReceiverId = receiverSlot;
-                moduleState[moduleIndex].mode ^= MODULE_MODE_BIND;
-                return 0;
-            });
-            new TextButton(this, grid.getFieldSlot(2, 1), "Share", [=]() {
-                // TODO
-                return 0;
-            });
-            grid.nextLine();
-            receiverCount++;
           }
-          else
-            break;
-        }
-        if (receiverCount < PXX2_MAX_RECEIVERS_PER_MODULE) {
-          char label[] = "Receiver X";
-          label[sizeof(label) - 2] = '1' + receiverCount;
-          new Subtitle(this, grid.getLabelSlot(true), label);
-          auto addButton = new TextButton(this, grid.getFieldSlot(), "Add");
-          addButton->setPressHandler([=]() {
-            // TODO pxx2AddReceiver(moduleIndex, receiverCount);
-            update();
-            failSafeChoice->setFocus(); // TODO lazy
-            return 0;
-          });
+          else {
+            new TextButton(this, grid.getFieldSlot(2, 0), STR_BIND, [=]() {
+                return 0;
+            });
+          }
           grid.nextLine();
         }
       }

@@ -43,6 +43,15 @@ void Dialog::paint(BitmapBuffer * dc)
   dc->drawSolidFilledRect(1, PAGE_LINE_HEIGHT + 1, width() - 3, height() - PAGE_LINE_HEIGHT - 3, CUSTOM_COLOR);
 }
 
+void Dialog::deleteLater()
+{
+  if (previousFocus) {
+    previousFocus->setFocus();
+  }
+
+  Window::deleteLater();
+}
+
 #define ALERT_FRAME_TOP           70
 #define ALERT_FRAME_PADDING       10
 #define ALERT_BITMAP_PADDING      15
