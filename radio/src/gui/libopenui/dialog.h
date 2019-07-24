@@ -41,8 +41,28 @@ class Dialog: public Window {
 
   protected:
     std::string title;
-    std::function<void(void)> confirmHandler;
     Window * previousFocus;
+};
+
+class MessageDialog: public Dialog {
+  public:
+    MessageDialog(const char * title, const char * message);
+
+#if defined(HARDWARE_KEYS)
+    void onKeyEvent(event_t event) override;
+#endif
+};
+
+class ConfirmDialog: public Dialog {
+  public:
+    ConfirmDialog(const char * title, const char * message, std::function<void(void)> confirmHandler);
+
+#if defined(HARDWARE_KEYS)
+    void onKeyEvent(event_t event) override;
+#endif
+
+  protected:
+    std::function<void(void)> confirmHandler;
 };
 
 class FullScreenDialog : public Dialog {
@@ -90,6 +110,12 @@ class FullScreenDialog : public Dialog {
     std::string message;
     bool running = false;
     std::function<bool(void)> closeCondition;
+    std::function<void(void)> confirmHandler;
 };
+
+inline void POPUP_INFORMATION(const char * str)
+{
+  new MessageDialog("Message", str);
+}
 
 #endif // _CONFIRMATION_H_

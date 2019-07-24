@@ -20,25 +20,6 @@
 
 #include "opentx.h"
 
-bool isPXX2ReceiverEmpty(uint8_t moduleIdx, uint8_t receiverIdx)
-{
-  return is_memclear(g_model.moduleData[moduleIdx].pxx2.receiverName[receiverIdx], PXX2_LEN_RX_NAME);
-}
-
-void removePXX2Receiver(uint8_t moduleIdx, uint8_t receiverIdx)
-{
-  memclear(g_model.moduleData[moduleIdx].pxx2.receiverName[receiverIdx], PXX2_LEN_RX_NAME);
-  g_model.moduleData[moduleIdx].pxx2.receivers &= ~(1 << receiverIdx);
-  storageDirty(EE_MODEL);
-}
-
-void removePXX2ReceiverIfEmpty(uint8_t moduleIdx, uint8_t receiverIdx)
-{
-  if (isPXX2ReceiverEmpty(moduleIdx, receiverIdx)) {
-    removePXX2Receiver(moduleIdx, receiverIdx);
-  }
-}
-
 void onPXX2R9MBindModeMenu(const char * result)
 {
   if (result == STR_16CH_WITH_TELEMETRY) {

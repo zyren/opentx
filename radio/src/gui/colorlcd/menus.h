@@ -224,15 +224,6 @@ bool menuStatsDebug(event_t event);
 bool menuStatsAnalogs(event_t event);
 bool menuStatsTraces(event_t event);
 
-static const MenuHandlerFunc menuTabStats[]  = {
-//  menuStatsGraph,
-//  menuStatsDebug,
-//  menuStatsAnalogs,
-//#if defined(DEBUG_TRACE_BUFFER)
-//  menuStatsTraces,
-//#endif
-};
-
 enum EnumTabMonitors
 {
   e_MonChannelsFirst,
@@ -323,7 +314,6 @@ void copyMix(uint8_t source, uint8_t dest, int8_t ch);
 
 void copySelection(char * dst, const char * src, uint8_t size);
 
-void drawPopupBackgroundAndBorder(coord_t x, coord_t y, coord_t w, coord_t h);
 void showMessageBox(const char * title);
 void runPopupWarning(event_t event);
 
@@ -331,13 +321,10 @@ extern void (* popupFunc)(event_t event);
 extern uint8_t warningInfoFlags;
 
 #define DISPLAY_WARNING(evt)                (*popupFunc)(evt)
-#define POPUP_INFORMATION(s)           (warningText = s, warningType = WARNING_TYPE_INFO, warningInfoText = 0, popupFunc = runPopupWarning)
 #define POPUP_WARNING(s)               (warningType = WARNING_TYPE_ASTERISK, warningText = s, warningInfoText = 0, popupFunc = runPopupWarning)
 #define POPUP_INPUT(s, func)           (warningText = s, popupFunc = func)
 #define SET_WARNING_INFO(info, len, flags)    (warningInfoText = info, warningInfoLength = len, warningInfoFlags = flags)
 
-#define POPUP_MENU_ADD_ITEM(s)         do { popupMenuOffsetType = MENU_OFFSET_INTERNAL; if (popupMenuItemsCount < POPUP_MENU_MAX_LINES) popupMenuItems[popupMenuItemsCount++] = s; } while (0)
-#define POPUP_MENU_SELECT_ITEM(s)      popupMenuSelectedItem =  (s > 0 ? (s < popupMenuItemsCount ? s : popupMenuItemsCount - 1) : 0)
 #define POPUP_MENU_START(func)         do { popupMenuHandler = (func); AUDIO_KEY_PRESS(); } while(0)
 #define POPUP_MENU_MAX_LINES           12
 #define MENU_MAX_DISPLAY_LINES         9

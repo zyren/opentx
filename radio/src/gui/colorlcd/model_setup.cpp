@@ -239,13 +239,39 @@ class BindRxChoiceMenu: public Menu {
       moduleIdx(moduleIdx),
       receiverIdx(receiverIdx)
     {
-      popupMenuItemsCount = min<uint8_t>(reusableBuffer.moduleSetup.bindInformation.candidateReceiversCount, PXX2_MAX_RECEIVERS_PER_MODULE);
-      for (uint8_t i = 0; i < popupMenuItemsCount; i++) {
-        addLine(reusableBuffer.moduleSetup.bindInformation.candidateReceiversNames[i], nullptr);
+      uint8_t receiversCount = min<uint8_t>(reusableBuffer.moduleSetup.bindInformation.candidateReceiversCount, PXX2_MAX_RECEIVERS_PER_MODULE);
+      for (uint8_t i = 0; i < receiversCount; i++) {
+        const char * receiverName = reusableBuffer.moduleSetup.bindInformation.candidateReceiversNames[i];
+        addLine(receiverName, [=]() {
+            reusableBuffer.moduleSetup.bindInformation.selectedReceiverIndex = i;
+            if (isModuleR9MAccess(moduleIdx) && reusableBuffer.moduleSetup.pxx2.moduleInformation.information.variant == PXX2_VARIANT_EU) {
+              reusableBuffer.moduleSetup.bindInformation.step = BIND_RX_NAME_SELECTED;
+//              POPUP_MENU_ADD_ITEM(STR_16CH_WITH_TELEMETRY);
+//              POPUP_MENU_ADD_ITEM(STR_16CH_WITHOUT_TELEMETRY);
+//              POPUP_MENU_START(onPXX2R9MBindModeMenu);
+            }
+            else if (isModuleR9MAccess(moduleIdx) && reusableBuffer.moduleSetup.pxx2.moduleInformation.information.variant == PXX2_VARIANT_FLEX) {
+              reusableBuffer.moduleSetup.bindInformation.step = BIND_RX_NAME_SELECTED;
+//              POPUP_MENU_ADD_ITEM(STR_FLEX_868);
+//              POPUP_MENU_ADD_ITEM(STR_FLEX_915);
+//              POPUP_MENU_START(onPXX2R9MBindModeMenu);
+            }
+            else {
+#if defined(SIMU)
+              memcpy(g_model.moduleData[moduleIdx].pxx2.receiverName[receiverIdx], receiverName, PXX2_LEN_RX_NAME);
+              storageDirty(EE_MODEL);
+              reusableBuffer.moduleSetup.bindInformation.step = BIND_OK;
+              new MessageDialog(STR_BIND, STR_BIND_OK);
+#else
+              reusableBuffer.moduleSetup.bindInformation.step = BIND_START;
+#endif
+            }
+        });
       }
 
       setCloseHandler([=]() {
           moduleState[moduleIdx].mode = MODULE_MODE_NORMAL;
+          removePXX2ReceiverIfEmpty(moduleIdx, receiverIdx);
       });
     }
 
@@ -306,6 +332,83 @@ class BindWaitDialog: public Dialog {
       }
     }
 #endif
+
+  protected:
+    uint8_t moduleIdx;
+    uint8_t receiverIdx;
+};
+
+class ReceiverButton: public TextButton {
+  public:
+    ReceiverButton(Window * parent, rect_t rect, uint8_t moduleIdx, uint8_t receiverIdx):
+      TextButton(parent, rect, STR_BIND, [=]() {
+          if (g_model.moduleData[moduleIdx].pxx2.receiverName[receiverIdx][0] == '\0') {
+            new BindWaitDialog(moduleIdx, receiverIdx);
+          }
+          else {
+            auto menu = new Menu();
+            menu->addLine(STR_BIND, [=]() {
+                new BindWaitDialog(moduleIdx, receiverIdx);
+                return 0;
+            });
+            menu->addLine(STR_OPTIONS, [=]() {
+                memclear(&reusableBuffer.hardwareAndSettings, sizeof(reusableBuffer.hardwareAndSettings));
+                reusableBuffer.hardwareAndSettings.receiverSettings.receiverId = receiverIdx;
+                // g_moduleIdx = moduleIdx;
+                // pushMenu(menuModelReceiverOptions);
+                return 0;
+            });
+            menu->addLine(STR_SHARE, [=]() {
+                reusableBuffer.moduleSetup.pxx2.shareReceiverIndex = receiverIdx;
+                moduleState[moduleIdx].mode = MODULE_MODE_SHARE;
+                return 0;
+            });
+            menu->addLine(STR_DELETE, [=]() {
+                memclear(&reusableBuffer.moduleSetup.pxx2, sizeof(reusableBuffer.moduleSetup.pxx2));
+                reusableBuffer.moduleSetup.pxx2.resetReceiverIndex = receiverIdx;
+                reusableBuffer.moduleSetup.pxx2.resetReceiverFlags = 0x01;
+                new ConfirmDialog(STR_RECEIVER, STR_RECEIVER_DELETE, [=]() {
+                    moduleState[moduleIdx].mode = MODULE_MODE_RESET;
+                    removePXX2Receiver(moduleIdx, receiverIdx);
+                });
+                return 0;
+            });
+            menu->addLine(STR_RESET, [=]() {
+                memclear(&reusableBuffer.moduleSetup.pxx2, sizeof(reusableBuffer.moduleSetup.pxx2));
+                reusableBuffer.moduleSetup.pxx2.resetReceiverIndex = receiverIdx;
+                reusableBuffer.moduleSetup.pxx2.resetReceiverFlags = 0xFF;
+                new ConfirmDialog(STR_RECEIVER, STR_RECEIVER_DELETE, [=]() {
+                    moduleState[moduleIdx].mode = MODULE_MODE_RESET;
+                    removePXX2Receiver(moduleIdx, receiverIdx);
+                });
+                return 0;
+            });
+            menu->setCloseHandler([=]() {
+                removePXX2ReceiverIfEmpty(moduleIdx, receiverIdx);
+            });
+          }
+          return 0;
+      }),
+      moduleIdx(moduleIdx),
+      receiverIdx(receiverIdx)
+    {
+    }
+
+    void checkEvents() override
+    {
+      if (g_model.moduleData[moduleIdx].pxx2.receiverName[receiverIdx][0] != '\0') {
+        char receiverName[PXX2_LEN_RX_NAME + 1];
+        memset(receiverName, 0, sizeof(receiverName));
+        strncpy(receiverName, g_model.moduleData[moduleIdx].pxx2.receiverName[receiverIdx],
+                effectiveLen(g_model.moduleData[moduleIdx].pxx2.receiverName[receiverIdx], PXX2_LEN_RX_NAME));
+        setText(receiverName);
+      }
+      else {
+        setText(STR_BIND);
+      }
+
+      TextButton::checkEvents();
+    }
 
   protected:
     uint8_t moduleIdx;
@@ -576,21 +679,7 @@ class ModuleWindow : public Window {
           char label[] = TR_RECEIVER " X";
           label[sizeof(label) - 2] = '1' + receiverIdx;
           new StaticText(this, grid.getLabelSlot(true), label);
-          if (g_model.moduleData[moduleIdx].pxx2.receiverName[receiverIdx][0] != '\0') {
-            char receiverName[PXX2_LEN_RX_NAME + 1];
-            memset(receiverName, 0, sizeof(receiverName));
-            strncpy(receiverName, g_model.moduleData[moduleIdx].pxx2.receiverName[receiverIdx],
-                    effectiveLen(g_model.moduleData[moduleIdx].pxx2.receiverName[receiverIdx], PXX2_LEN_RX_NAME));
-            new TextButton(this, grid.getFieldSlot(2, 0), receiverName, [=]() {
-                return 0;
-            });
-          }
-          else {
-            new TextButton(this, grid.getFieldSlot(2, 0), STR_BIND, [=]() {
-              new BindWaitDialog(moduleIdx, receiverIdx);
-                return 0;
-            });
-          }
+          new ReceiverButton(this, grid.getFieldSlot(2, 0), moduleIdx, receiverIdx);
           grid.nextLine();
         }
       }

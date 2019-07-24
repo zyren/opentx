@@ -25,7 +25,6 @@
 Dialog::Dialog(std::string title, const rect_t rect):
   Window(&mainWindow, rect, OPAQUE),
   title(std::move(title)),
-  confirmHandler(confirmHandler),
   previousFocus(focusWindow)
 {
   bringToTop();
@@ -64,7 +63,8 @@ void Dialog::deleteLater()
 FullScreenDialog::FullScreenDialog(uint8_t type, std::string title, std::string message, std::function<void(void)> confirmHandler):
   Dialog(title, {0, 0, LCD_W, LCD_H}),
   type(type),
-  message(std::move(message))
+  message(std::move(message)),
+  confirmHandler(confirmHandler)
 {
 #if defined(HARDWARE_TOUCH)
   new FabIconButton(this, LCD_W - 50, ALERT_BUTTON_TOP, ICON_NEXT,
@@ -185,14 +185,48 @@ void FullScreenDialog::runForever()
   Window::deleteLater();
 }
 
-void showPopup(uint8_t type, const char * title, const char * msg, const char * info)
-{
-  auto dialog = new FullScreenDialog(type, title, msg);
-  dialog->runForever();
-}
-
 void raiseAlert(const char * title, const char * msg, const char * info, uint8_t sound)
 {
   AUDIO_ERROR_MESSAGE(sound);
-  showPopup(WARNING_TYPE_ALERT, title, msg, nullptr);
+  auto dialog = new FullScreenDialog(WARNING_TYPE_ALERT, title, msg);
+  dialog->runForever();
 }
+
+MessageDialog::MessageDialog(const char * title, const char * message):
+  Dialog(title, {50, 73, LCD_W - 100, LCD_H - 146})
+{
+  new StaticText(this, {0, height() / 2, width(), PAGE_LINE_HEIGHT}, message, CENTERED);
+}
+
+#if defined(HARDWARE_KEYS)
+void MessageDialog::onKeyEvent(event_t event)
+{
+  TRACE_WINDOWS("%s received event 0x%X", getWindowDebugString().c_str(), event);
+
+  if (event == EVT_KEY_BREAK(KEY_EXIT) || event == EVT_KEY_BREAK(KEY_ENTER)) {
+    deleteLater();
+  }
+}
+#endif
+
+ConfirmDialog::ConfirmDialog(const char *title, const char *message, std::function<void(void)> confirmHandler) :
+  Dialog(title, {50, 73, LCD_W - 100, LCD_H - 146}),
+  confirmHandler(std::move(confirmHandler))
+{
+  new StaticText(this, {0, height() / 2, width(), PAGE_LINE_HEIGHT}, message, CENTERED);
+}
+
+#if defined(HARDWARE_KEYS)
+void ConfirmDialog::onKeyEvent(event_t event)
+{
+  TRACE_WINDOWS("%s received event 0x%X", getWindowDebugString().c_str(), event);
+
+  if (event == EVT_KEY_BREAK(KEY_ENTER)) {
+    confirmHandler();
+    deleteLater();
+  }
+  else if (event == EVT_KEY_BREAK(KEY_EXIT)) {
+    deleteLater();
+  }
+}
+#endif
