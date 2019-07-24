@@ -89,7 +89,6 @@ void deleteExpo(uint8_t idx)
   storageDirty(EE_MODEL);
 }
 
-// ONE
 class InputEditWindow: public Page {
   public:
     InputEditWindow(int8_t input, uint8_t index):
