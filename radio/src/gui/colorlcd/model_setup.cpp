@@ -189,6 +189,10 @@ class RegisterDialog: public Dialog {
       FormField::link(exitButton, edit);
 
       startRegister();
+
+      setCloseHandler([=]() {
+          moduleState[moduleIdx].mode = MODULE_MODE_NORMAL;
+      });
     }
 
     void startRegister()
@@ -228,15 +232,40 @@ class RegisterDialog: public Dialog {
     TextButton * exitButton;
 };
 
+class BindRxChoiceMenu: public Menu {
+  public:
+    BindRxChoiceMenu(uint8_t moduleIdx, uint8_t receiverIdx):
+      Menu(),
+      moduleIdx(moduleIdx),
+      receiverIdx(receiverIdx)
+    {
+      popupMenuItemsCount = min<uint8_t>(reusableBuffer.moduleSetup.bindInformation.candidateReceiversCount, PXX2_MAX_RECEIVERS_PER_MODULE);
+      for (uint8_t i = 0; i < popupMenuItemsCount; i++) {
+        addLine(reusableBuffer.moduleSetup.bindInformation.candidateReceiversNames[i], nullptr);
+      }
+
+      setCloseHandler([=]() {
+          moduleState[moduleIdx].mode = MODULE_MODE_NORMAL;
+      });
+    }
+
+  protected:
+    uint8_t moduleIdx;
+    uint8_t receiverIdx;
+};
+
 class BindWaitDialog: public Dialog {
   public:
     BindWaitDialog(uint8_t moduleIdx, uint8_t receiverIdx):
       Dialog(STR_BIND, {50, 73, LCD_W - 100, LCD_H - 146}),
-      moduleIdx(moduleIdx)
+      moduleIdx(moduleIdx),
+      receiverIdx(receiverIdx)
     {
       new StaticText(this, {0, height() / 2, width(), PAGE_LINE_HEIGHT}, STR_WAITING_FOR_RX, CENTERED);
-
       startBind();
+      setCloseHandler([=]() {
+          moduleState[moduleIdx].mode = MODULE_MODE_NORMAL;
+      });
     }
 
     void startBind()
@@ -258,13 +287,13 @@ class BindWaitDialog: public Dialog {
 
     void checkEvents() override
     {
-      Dialog::checkEvents();
-    }
-
-    void deleteLater()
-    {
-      moduleState[moduleIdx].mode = 0;
-      // TODO removePXX2ReceiverIfEmpty(moduleIdx, receiverIdx);
+      if (reusableBuffer.moduleSetup.bindInformation.candidateReceiversCount > 0) {
+        Dialog::deleteLater();
+        new BindRxChoiceMenu(moduleIdx, receiverIdx);
+      }
+      else {
+        Dialog::checkEvents();
+      }
     }
 
 #if defined(HARDWARE_KEYS)

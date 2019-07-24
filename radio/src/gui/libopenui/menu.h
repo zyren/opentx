@@ -116,6 +116,9 @@ class Menu : public Window {
 
     void deleteLater()
     {
+      if (closeHandler)
+        closeHandler();
+
 #if !defined(HARDWARE_TOUCH)
       if (previousFocus) {
         previousFocus->setFocus();
