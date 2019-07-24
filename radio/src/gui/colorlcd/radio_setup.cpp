@@ -403,7 +403,7 @@ void RadioSetupPage::build(FormWindow * window)
   grid.nextLine();
 
 #if defined(FAI_CHOICE)
-  case ITEM_SETUP_FAI:
+/*  case ITEM_SETUP_FAI:
     lcdDrawText(MENUS_MARGIN_LEFT, y, "FAI Mode");
     if (g_eeGeneral.fai) {
       lcdDrawText(RADIO_SETUP_2ND_COLUMN, y, "Locked in FAI Mode");
@@ -415,7 +415,7 @@ void RadioSetupPage::build(FormWindow * window)
           POPUP_CONFIRMATION("FAI mode?");
       }
     }
-    break;
+    break;*/
 #endif
 
   // Switches delay

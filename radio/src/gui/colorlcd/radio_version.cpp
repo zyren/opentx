@@ -20,7 +20,46 @@
 
 #include "radio_version.h"
 #include "opentx.h"
+#include "options.h"
 #include "libopenui.h"
+
+class OptionsButton : public Button {
+  public:
+    OptionsButton(Window * parent, const rect_t &rect) :
+      Button(parent, rect)
+    {
+      coord_t optionWidth = 0;
+      for (uint8_t i=0; options[i]; i++) {
+        const char * option = options[i];
+        optionWidth+= getTextWidth(option);
+        if(optionWidth + 5 > width()) {
+          setHeight(getHeight() + 20);
+          optionWidth = 0;
+        }
+      }
+    };
+
+    virtual void paint(BitmapBuffer * dc) override
+    {
+      coord_t y = 0;
+      lcdNextPos = 0;
+      for (uint8_t i=0; options[i]; i++) {
+        const char * option = options[i];
+        coord_t optionWidth = getTextWidth(option);
+
+        if((lcdNextPos + 5 + optionWidth) > width()) {
+          dc->drawText(lcdNextPos, y, ",");
+          lcdNextPos = 0;
+          y += FH;
+         }
+        if (i > 0 && lcdNextPos != 0)
+          dc->drawText(lcdNextPos, y, ", ");
+        dc->drawText(lcdNextPos, y, option);
+      }
+    }
+
+  protected:
+};
 
 RadioVersionPage::RadioVersionPage():
   PageTab(STR_MENUVERSION, ICON_RADIO_VERSION)
@@ -54,6 +93,9 @@ void RadioVersionPage::build(FormWindow * window)
   new StaticText(window, grid.getLabelSlot(), "CPU UID");
   new StaticText(window, grid.getFieldSlot(), reusableBuffer.version.id);
   grid.nextLine();
+
+  new StaticText(window, grid.getLabelSlot(), "OPTIONS");
+  new OptionsButton(window, grid.getFieldSlot());
   grid.nextLine();
 
   auto button = new TextButton(window, grid.getCenteredSlot(250), STR_FACTORYRESET,
