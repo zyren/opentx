@@ -95,18 +95,8 @@ void RadioVersionPage::build(FormWindow * window)
   grid.nextLine();
 
   new StaticText(window, grid.getLabelSlot(), "OPTIONS");
-  new OptionsButton(window, grid.getFieldSlot());
-  grid.nextLine();
+  auto firmwareOptions = new OptionsButton(window, grid.getFieldSlot());
 
-  auto button = new TextButton(window, grid.getCenteredSlot(250), STR_FACTORYRESET,
-                               [=]() -> int8_t {
-                                   new FullScreenDialog(WARNING_TYPE_CONFIRM, STR_CONFIRMRESET, STR_POPUPS_ENTER_EXIT, [=]() {
-                                       storageEraseAll(false);
-                                       NVIC_SystemReset();
-                                       return 0;
-                                   });
-                                   return 0;
-                               });
 
-  window->setFirstField(button);
+  window->setFirstField(firmwareOptions);
 }
