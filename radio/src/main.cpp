@@ -52,6 +52,9 @@ void handleUsbConnection()
       usbPluggedIn();
     }
   }
+#if defined(COLORLCD)
+#warning "USB popup"
+#else
   if (!usbStarted() && usbPlugged() && getSelectedUsbMode() == USB_UNSELECTED_MODE) {
     if (g_eeGeneral.USBMode == USB_UNSELECTED_MODE && popupMenuItemsCount == 0) {
       POPUP_MENU_ADD_ITEM(STR_USB_JOYSTICK);
@@ -65,6 +68,7 @@ void handleUsbConnection()
       setSelectedUsbMode(g_eeGeneral.USBMode);
     }
   }
+#endif
   if (usbStarted() && !usbPlugged()) {
     usbStop();
     if (getSelectedUsbMode() == USB_MASS_STORAGE_MODE) {
