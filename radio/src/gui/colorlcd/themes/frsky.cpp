@@ -183,16 +183,16 @@ class FrskyTheme: public Theme
       delete calibTrackpBackground;
       calibTrackpBackground = BitmapBuffer::load(getThemePath("trackp_background.png"));
 
-      delete calibHorus;
+      delete calibRadioPict;
 #if defined(PCBX10)
       if(STICKS_PWM_ENABLED()) {
-        calibHorus = BitmapBuffer::load(getThemePath("X10S.bmp"));
+        calibRadioPict = BitmapBuffer::load(getThemePath("X10S.bmp"));
       }
       else {
-        calibHorus = BitmapBuffer::load(getThemePath("X10.bmp"));
+        calibRadioPict = BitmapBuffer::load(getThemePath("X10.bmp"));
       }
 #else
-      calibHorus = BitmapBuffer::load(getThemePath("horus.bmp"));
+      calibRadioPict = BitmapBuffer::load(getThemePath("horus.bmp"));
 #endif
 
       // Model Selection screen

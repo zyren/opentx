@@ -83,7 +83,7 @@ extern BitmapBuffer * modelselWizardBackground;
 extern BitmapBuffer * calibStick;
 extern BitmapBuffer * calibStickBackground;
 extern BitmapBuffer * calibTrackpBackground;
-extern BitmapBuffer * calibHorus;
+extern BitmapBuffer * calibRadioPict;
 
 // Channels monitor bitmaps
 extern BitmapBuffer * chanMonLockedBitmap;

@@ -88,9 +88,9 @@ class PotCalibrationWindow: public Window {
 
     virtual void paint(BitmapBuffer * dc)
     {
-      // if(rect.h > rect.w)
-        // drawVerticalSlider(5, 8, rect.h - 18, calibratedAnalogs[potIndex], -RESX, RESX, 40, OPTION_SLIDER_TICKS | OPTION_SLIDER_BIG_TICKS | OPTION_SLIDER_SQUARE_BUTTON);
-      // else
+      if(rect.h > rect.w)
+        drawVerticalSlider(5, 8, rect.h - 18, calibratedAnalogs[potIndex], -RESX, RESX, 40, OPTION_SLIDER_TICKS | OPTION_SLIDER_BIG_TICKS | OPTION_SLIDER_SQUARE_BUTTON);
+      else
         drawHorizontalSlider(5, 8, rect.w - 18, calibratedAnalogs[potIndex], -RESX, RESX, 40, OPTION_SLIDER_TICKS | OPTION_SLIDER_BIG_TICKS | OPTION_SLIDER_SQUARE_BUTTON);
     }
 
@@ -118,11 +118,14 @@ void RadioCalibrationPage::buildBody(FormWindow * window)
   menuCalibrationState = CALIB_START;
 
   // Background radio image
-  new StaticBitmap(window, {LCD_W/2 -calibHorus->getWidth()/2, 5, calibHorus->getHeight(), calibHorus->getWidth()}, calibHorus);
-
+#if LCD_W > LCD_H
+  new StaticBitmap(window, {LCD_W/2 -calibRadioPict->getWidth()/2, 5, calibRadioPict->getHeight(), calibRadioPict->getWidth()}, calibRadioPict);
+#else
+  new StaticBitmap(window, {LCD_W/2 -calibRadioPict->getWidth()/2, LCD_H/2 -calibRadioPict->getHeight()/2, calibRadioPict->getHeight(), calibRadioPict->getWidth()}, calibRadioPict);
+#endif
   // The two sticks
-  new StickCalibrationWindow(window, {20, 20, 90, 90}, STICK1, STICK2);
-  new StickCalibrationWindow(window, {LCD_W-110, 20, 90, 90}, STICK4, STICK3);
+  new StickCalibrationWindow(window, {40, 20, 90, 90}, STICK1, STICK2);
+  new StickCalibrationWindow(window, {LCD_W-130, 20, 90, 90}, STICK4, STICK3);
 
 #if defined(PCBHORUS)
   // The 2 main sliders
@@ -133,7 +136,10 @@ void RadioCalibrationPage::buildBody(FormWindow * window)
   new PotCalibrationWindow(window, {0, window->height()-25, 150, 20}, POT1);
   new MultiPosCalibrationWindow(window, {LCD_W/2-25,window->height()-25, 50, 20}, POT2);
   new PotCalibrationWindow(window, {LCD_W-150, window->height()-25, 150, 20}, POT3);
-#endif
+#elif defined(PCBNV14)
+  new PotCalibrationWindow(window, {0, window->height()-25, 150, 20}, POT1);
+  new PotCalibrationWindow(window, {LCD_W-150, window->height()-25, 150, 20}, POT2);
+ #endif
 }
 
 void RadioCalibrationPage::checkEvents()

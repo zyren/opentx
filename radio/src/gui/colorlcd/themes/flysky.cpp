@@ -213,17 +213,8 @@ class FlyskyTheme: public Theme
       delete calibTrackpBackground;
       calibTrackpBackground = BitmapBuffer::load(getThemePath("trackp_background.png"));
 
-      delete calibHorus;
-#if defined(PCBX10)
-      if(STICKS_PWM_ENABLED()) {
-        calibHorus = BitmapBuffer::load(getThemePath("X10S.bmp"));
-      }
-      else {
-        calibHorus = BitmapBuffer::load(getThemePath("X10.bmp"));
-      }
-#else
-      calibHorus = BitmapBuffer::load(getThemePath("horus.bmp"));
-#endif
+      delete calibRadioPict;
+      calibRadioPict = BitmapBuffer::load(getThemePath("NV14.bmp"));
 
       // Model Selection screen
       delete modelselIconBitmap;

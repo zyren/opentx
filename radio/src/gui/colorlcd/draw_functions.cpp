@@ -99,7 +99,6 @@ void drawVerticalTrimPosition(coord_t x, coord_t y, int16_t dir)
   // }
 }
 
-#if 0
 void drawVerticalSlider(coord_t x, coord_t y, int len, int val, int min, int max, uint8_t steps, uint32_t options)
 {
   val = limit(min, val, max);
@@ -132,7 +131,6 @@ void drawVerticalSlider(coord_t x, coord_t y, int len, int val, int min, int max
     drawTrimSquare(x, y - 2);
   }
 }
-#endif
 
 void drawHorizontalSlider(coord_t x, coord_t y, int len, int val, int min, int max, uint8_t steps, uint32_t options)
 {
