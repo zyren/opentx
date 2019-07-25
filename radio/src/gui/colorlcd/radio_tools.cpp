@@ -78,31 +78,50 @@ RadioToolsPage::RadioToolsPage() :
 {
 }
 
-void RadioToolsPage::rebuild(FormWindow * window, int8_t focusChannel)
+void RadioToolsPage::build(FormWindow * window)
 {
-  coord_t scrollPosition = window->getScrollPositionY();
-  window->clear();
-  build(window, focusChannel);
-  window->setScrollPositionY(scrollPosition);
+  this->window = window;
+
+  memclear(&reusableBuffer.radioTools, sizeof(reusableBuffer.radioTools));
+  waiting = 0;
+
+#if defined(PXX2)
+  for (uint8_t module = 0; module < NUM_MODULES; module++) {
+    if (isModulePXX2(module) && (module == INTERNAL_MODULE ? IS_INTERNAL_MODULE_ON() : IS_EXTERNAL_MODULE_ON())) {
+      waiting |= (1 << module);
+      moduleState[module].readModuleInformation(&reusableBuffer.radioTools.modules[module], PXX2_HW_INFO_TX_ID, PXX2_HW_INFO_TX_ID);
+    }
+  }
+#endif
+
+  rebuild(window);
 }
 
-void RadioToolsPage::build(FormWindow * window, int8_t focusChannel)
+void RadioToolsPage::checkEvents()
+{
+  bool refresh = false;
+
+  for (uint8_t module = 0; module < NUM_MODULES; module++) {
+    if ((waiting & (1 << module)) && reusableBuffer.radioTools.modules[module].information.modelID) {
+      waiting &= ~(1 << module);
+      refresh = true;
+    }
+  }
+
+  if (refresh) {
+    rebuild(window);
+  }
+
+  PageTab::checkEvents();
+}
+
+void RadioToolsPage::rebuild(FormWindow * window)
 {
   FormGridLayout grid;
   grid.spacer(8);
   grid.setLabelWidth(100);
 
-  memclear(&reusableBuffer.radioTools, sizeof(reusableBuffer.radioTools));
-#if defined(PXX2)
-  if (!initDone) {
-    for (uint8_t module = 0; module < NUM_MODULES; module++) {
-      if (isModulePXX2(module) && (module == INTERNAL_MODULE ? IS_INTERNAL_MODULE_ON() : IS_EXTERNAL_MODULE_ON())) {
-        moduleState[module].readModuleInformation(&reusableBuffer.radioTools.modules[module], PXX2_HW_INFO_TX_ID, PXX2_HW_INFO_TX_ID);
-      }
-    }
-    initDone = true;
-  }
-#endif
+  window->clear();
 
 // LUA scripts in TOOLS
 #if defined(LUA) || defined(DEBUG)
@@ -161,7 +180,7 @@ void RadioToolsPage::build(FormWindow * window, int8_t focusChannel)
 
   if (isModuleOptionAvailable(reusableBuffer.hardwareAndSettings.modules[INTERNAL_MODULE].information.modelID, MODULE_OPTION_POWER_METER)) {
     new StaticText(window, grid.getLabelSlot(), "access", BUTTON_BACKGROUND | CENTERED);
-    auto button = new TextButton(window, grid.getFieldSlot(1), STR_POWER_METER_INT, [=]() -> uint8_t {
+    new TextButton(window, grid.getFieldSlot(1), STR_POWER_METER_INT, [=]() -> uint8_t {
 //        new RadioPowerMeter(INTERNAL_MODULE);
         return 0;
     }, 0);
@@ -170,8 +189,8 @@ void RadioToolsPage::build(FormWindow * window, int8_t focusChannel)
 
   if (isModuleOptionAvailable(reusableBuffer.hardwareAndSettings.modules[EXTERNAL_MODULE].information.modelID, MODULE_OPTION_SPECTRUM_ANALYSER)) {
     new StaticText(window, grid.getLabelSlot(), "access", BUTTON_BACKGROUND | CENTERED);
-    auto button = new TextButton(window, grid.getFieldSlot(1), STR_SPECTRUM_ANALYSER_EXT, [=]() -> uint8_t {
-//        new RadioSpectrumAnalyser(EXTERNAL_MODULE);
+    new TextButton(window, grid.getFieldSlot(1), STR_SPECTRUM_ANALYSER_EXT, [=]() -> uint8_t {
+        new RadioSpectrumAnalyser(EXTERNAL_MODULE);
         return 0;
     }, 0);
     grid.nextLine();
@@ -179,7 +198,7 @@ void RadioToolsPage::build(FormWindow * window, int8_t focusChannel)
 
   if (isModuleOptionAvailable(reusableBuffer.hardwareAndSettings.modules[EXTERNAL_MODULE].information.modelID, MODULE_OPTION_POWER_METER)) {
     new StaticText(window, grid.getLabelSlot(), "access", BUTTON_BACKGROUND | CENTERED);
-    auto button = new TextButton(window, grid.getFieldSlot(1), STR_POWER_METER_EXT, [=]() -> uint8_t {
+    new TextButton(window, grid.getFieldSlot(1), STR_POWER_METER_EXT, [=]() -> uint8_t {
 //        new RadioPowerMeter(EXTERNAL_MODULE);
       return 0;
     }, 0);

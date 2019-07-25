@@ -24,13 +24,12 @@ class RadioToolsPage: public PageTab {
   public:
     RadioToolsPage();
 
-    void build(FormWindow * window) override
-    {
-      build(window, -1);
-    }
+    void build(FormWindow * window) override;
+
+    void checkEvents() override;
 
   protected:
-    void build(FormWindow * window, int8_t focusChannel);
-    void rebuild(FormWindow * window, int8_t focusChannel);
-    bool initDone = false;
+    void rebuild(FormWindow * window);
+    FormWindow * window = nullptr;
+    uint8_t waiting = 0;
 };

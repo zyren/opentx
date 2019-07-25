@@ -23,7 +23,7 @@
 
 #include <inttypes.h>
 
-typedef int32_t coord_t;
+typedef int coord_t;
 
 struct point_t
 {
