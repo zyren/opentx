@@ -151,7 +151,7 @@ void RadioHardwarePage::build(FormWindow * window)
   grid.nextLine();
 
   // Factory reset
-  new TextButton(window, grid.getCenteredSlot(250), STR_FACTORYRESET,
+  new TextButton(window, grid.getFieldSlot(), STR_FACTORYRESET,
                  [=]() -> int8_t {
                      new FullScreenDialog(WARNING_TYPE_CONFIRM, STR_CONFIRMRESET, STR_POPUPS_ENTER_EXIT, [=]() {
                          storageEraseAll(false);

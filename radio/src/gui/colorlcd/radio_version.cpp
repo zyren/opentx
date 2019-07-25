@@ -23,10 +23,10 @@
 #include "options.h"
 #include "libopenui.h"
 
-class OptionsButton : public Button {
+class OptionsText : public StaticText {
   public:
-    OptionsButton(Window * parent, const rect_t &rect) :
-      Button(parent, rect)
+    OptionsText(Window * parent, const rect_t &rect) :
+      StaticText(parent, rect)
     {
       coord_t optionWidth = 0;
       for (uint8_t i=0; options[i]; i++) {
@@ -78,6 +78,10 @@ void RadioVersionPage::build(FormWindow * window)
   new StaticText(window, grid.getFieldSlot(), vers_stamp);
   grid.nextLine();
 
+  new StaticText(window, grid.getLabelSlot(), "FW Options");
+  auto firmwareOptions = new OptionsText(window, grid.getFieldSlot());
+  grid.spacer(firmwareOptions->height() + PAGE_LINE_SPACING);
+
   new StaticText(window, grid.getLabelSlot(), "FW Date");
   new StaticText(window, grid.getFieldSlot(), date_stamp);
   grid.nextLine();
@@ -93,10 +97,4 @@ void RadioVersionPage::build(FormWindow * window)
   new StaticText(window, grid.getLabelSlot(), "CPU UID");
   new StaticText(window, grid.getFieldSlot(), reusableBuffer.version.id);
   grid.nextLine();
-
-  new StaticText(window, grid.getLabelSlot(), "OPTIONS");
-  auto firmwareOptions = new OptionsButton(window, grid.getFieldSlot());
-
-
-  window->setFirstField(firmwareOptions);
 }
