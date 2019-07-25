@@ -27,16 +27,7 @@ class FormField: public Window {
   friend class FormWindow;
 
   public:
-    FormField(Window * parent, const rect_t & rect, uint8_t flags=0) :
-      Window(parent, rect, flags)
-    {
-      if (current) {
-        setPreviousField(current);
-        current->setNextField(this);
-      }
-
-      current = this;
-    }
+    FormField(Window * parent, const rect_t & rect, uint8_t flags=0);
 
     inline void setNextField(FormField *field)
     {
@@ -119,10 +110,12 @@ class FormGroup: public FormField {
       first = field;
     }
 
-    inline void setLastField(FormField * field)
+    inline void setLastField(FormField * field = nullptr)
     {
+      if (!field)
+        field = getCurrentField();
       FormField::link(field, first);
-      FormField::setCurrentField(this);
+      // FormField::setCurrentField(this);
     }
 
     FormField * getFirstField()
@@ -140,11 +133,12 @@ class FormGroup: public FormField {
     void paint(BitmapBuffer * dc) override;
 };
 
-class FormWindow: public FormGroup {
+class FormWindow: public Window {
   public:
     FormWindow(Window * parent, const rect_t & rect) :
-      FormGroup(parent, rect)
+      Window(parent, rect)
     {
+      FormField::current = nullptr;
     }
 
 #if defined(DEBUG_WINDOWS)
@@ -154,10 +148,28 @@ class FormWindow: public FormGroup {
     }
 #endif
 
+    void clear()
+    {
+      first = nullptr;
+      Window::clear();
+    }
+
+    FormField * getFirstField()
+    {
+      return first;
+    }
+
     inline void setFirstField(FormField * field)
     {
-      FormGroup::setFirstField(field);
+      first = field;
       field->setFocus();
+    }
+
+    inline void setLastField(FormField * field = nullptr)
+    {
+      if (!field)
+        field = FormField::getCurrentField();
+      FormField::link(field, first);
     }
 
   protected:
@@ -169,6 +181,9 @@ class FormWindow: public FormGroup {
     void paint(BitmapBuffer * dc) override
     {
     }
+
+  protected:
+    FormField * first = nullptr;
 };
 
 #endif

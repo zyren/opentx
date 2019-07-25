@@ -24,6 +24,21 @@
 
 FormField * FormField::current = nullptr;
 
+FormField::FormField(Window *parent, const rect_t &rect, uint8_t flags) :
+        Window(parent, rect, flags)
+{
+  if (current) {
+    setPreviousField(current);
+    current->setNextField(this);
+  }
+
+  FormWindow * form = dynamic_cast<FormWindow *>(parent);
+  if (form && !form->getFirstField())
+    form->setFirstField(this);
+
+  current = this;
+}
+
 #if defined(HARDWARE_KEYS)
 void FormWindow::onKeyEvent(event_t event)
 {

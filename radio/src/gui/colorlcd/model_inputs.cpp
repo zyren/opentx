@@ -395,8 +395,6 @@ void ModelInputsPage::build(FormWindow * window, int8_t focusIndex)
       new StaticText(window, grid.getLabelSlot(), getSourceString(MIXSRC_FIRST_INPUT + input), BUTTON_BACKGROUND | CENTERED);
       while (inputIndex < MAX_EXPOS && line->chn == input && EXPO_VALID(line)) {
         Button * button = new InputLineButton(window, grid.getFieldSlot(), inputIndex);
-        if (!window->getFirstField())
-          window->setFirstField(button);
         if (focusIndex == inputIndex)
           button->setFocus();
         button->setPressHandler([=]() -> uint8_t {

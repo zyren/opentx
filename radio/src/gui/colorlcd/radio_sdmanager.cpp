@@ -162,9 +162,6 @@ void RadioSdManagerPage::build(FormWindow *window)
           build(window);
           return 0;
       }, 0);
-      if (!window->getFirstField()) {
-        window->setFirstField(button);
-      }
       grid.nextLine();
     }
 
@@ -235,13 +232,11 @@ void RadioSdManagerPage::build(FormWindow *window)
       button->setFocusHandler([=]() {
           preview->setFile(getFullPath(name));
       });
-      if (!window->getFirstField()) {
-        window->setFirstField(button);
-      }
       grid.nextLine();
     }
   }
 
+  window->setLastField();
   window->setInnerHeight(grid.getWindowHeight());
   preview->setHeight(max(window->height(), grid.getWindowHeight()));
 }

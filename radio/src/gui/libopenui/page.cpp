@@ -47,7 +47,8 @@ void PageHeader::paint(BitmapBuffer * dc)
 Page::Page(unsigned icon):
   Window(&mainWindow, {0, 0, LCD_W, LCD_H}, OPAQUE),
   header(this, icon),
-  body(this, { 0, MENU_HEADER_HEIGHT, LCD_W, LCD_H - MENU_HEADER_HEIGHT })
+  body(this, { 0, MENU_HEADER_HEIGHT, LCD_W, LCD_H - MENU_HEADER_HEIGHT }),
+  previousFocus(focusWindow)
 {
   setFocus();
 }
@@ -59,6 +60,15 @@ Page::~Page()
   NumberKeyboard::instance()->disable(false);
   CurveKeyboard::instance()->disable(false);
 #endif
+}
+
+void Page::deleteLater()
+{
+  if (previousFocus) {
+    previousFocus->setFocus();
+  }
+
+  Window::deleteLater();
 }
 
 void Page::paint(BitmapBuffer * dc)

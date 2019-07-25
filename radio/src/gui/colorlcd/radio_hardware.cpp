@@ -95,7 +95,6 @@ void RadioHardwarePage::build(FormWindow * window)
       });
       return 0;
   });
-  window->setFirstField(calib);
   grid.nextLine();
 
   // Sticks
@@ -151,18 +150,18 @@ void RadioHardwarePage::build(FormWindow * window)
   batCal->setWindowFlags(REFRESH_ALWAYS);
   grid.nextLine();
 
-  //Factory reset
+  // Factory reset
   new TextButton(window, grid.getCenteredSlot(250), STR_FACTORYRESET,
-                               [=]() -> int8_t {
-                                 new FullScreenDialog(WARNING_TYPE_CONFIRM, STR_CONFIRMRESET, STR_POPUPS_ENTER_EXIT, [=]() {
-                                   storageEraseAll(false);
-                                   NVIC_SystemReset();
-                                   return 0;
-                                 });
-                                 return 0;
-                               });
+                 [=]() -> int8_t {
+                     new FullScreenDialog(WARNING_TYPE_CONFIRM, STR_CONFIRMRESET, STR_POPUPS_ENTER_EXIT, [=]() {
+                         storageEraseAll(false);
+                         NVIC_SystemReset();
+                         return 0;
+                     });
+                     return 0;
+                 });
   grid.nextLine();
 
-  FormField::link(batCal, window->getFirstField());
+  window->setLastField();
   window->setInnerHeight(grid.getWindowHeight());
 }

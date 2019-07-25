@@ -119,6 +119,7 @@ void TabsGroup::setCurrentTab(PageTab * tab)
 {
   if (tab != currentTab) {
     setFocus();
+    FormField::clearCurrentField();
     body.clear();
 #if defined(HARDWARE_TOUCH)
     TextKeyboard::instance()->disable(false);

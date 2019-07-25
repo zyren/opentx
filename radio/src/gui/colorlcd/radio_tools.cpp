@@ -142,8 +142,6 @@ void RadioToolsPage::build(FormWindow * window, int8_t focusChannel)
           //luaExec(path);
           return 0;
         }, 0);
-        if (!window->getFirstField())
-          window->setFirstField(button);
         grid.nextLine();
       }
     }
@@ -154,12 +152,10 @@ void RadioToolsPage::build(FormWindow * window, int8_t focusChannel)
   // PXX2 modules tools
   if (isModuleOptionAvailable(reusableBuffer.hardwareAndSettings.modules[INTERNAL_MODULE].information.modelID, MODULE_OPTION_SPECTRUM_ANALYSER)) {
     new StaticText(window, grid.getLabelSlot(), "access", BUTTON_BACKGROUND | CENTERED);
-    auto button = new TextButton(window, grid.getFieldSlot(1), STR_SPECTRUM_ANALYSER_INT, [=]() -> uint8_t {
+    new TextButton(window, grid.getFieldSlot(1), STR_SPECTRUM_ANALYSER_INT, [=]() -> uint8_t {
         new RadioSpectrumAnalyser(INTERNAL_MODULE);
         return 0;
     }, 0);
-    if (!window->getFirstField())
-      window->setFirstField(button);
     grid.nextLine();
   }
 
@@ -169,8 +165,6 @@ void RadioToolsPage::build(FormWindow * window, int8_t focusChannel)
 //        new RadioPowerMeter(INTERNAL_MODULE);
         return 0;
     }, 0);
-    if (!window->getFirstField())
-      window->setFirstField(button);
     grid.nextLine();
   }
 
@@ -180,8 +174,6 @@ void RadioToolsPage::build(FormWindow * window, int8_t focusChannel)
 //        new RadioSpectrumAnalyser(EXTERNAL_MODULE);
         return 0;
     }, 0);
-    if (!window->getFirstField())
-      window->setFirstField(button);
     grid.nextLine();
   }
 
@@ -191,11 +183,12 @@ void RadioToolsPage::build(FormWindow * window, int8_t focusChannel)
 //        new RadioPowerMeter(EXTERNAL_MODULE);
       return 0;
     }, 0);
-    if (!window->getFirstField())
-      window->setFirstField(button);
+
     grid.nextLine();
   }
 #endif
+
+  window->setLastField();
 
   window->setInnerHeight(grid.getWindowHeight());
 }

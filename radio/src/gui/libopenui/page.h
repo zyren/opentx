@@ -72,11 +72,14 @@ class Page: public Window {
     }
 #endif
 
+    void deleteLater();
+
     void paint(BitmapBuffer * dc) override;
 
   protected:
     PageHeader header;
     FormWindow body;
+    Window * previousFocus;
 };
 
 #endif // _PAGE_H_
