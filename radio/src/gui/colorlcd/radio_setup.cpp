@@ -378,6 +378,13 @@ void RadioSetupPage::build(FormWindow * window)
     grid.nextLine();
   }
 
+#if defined(PXX2)
+  // Owner ID
+  new StaticText(window, grid.getLabelSlot(), STR_OWNER_ID);
+  new TextEdit(window, grid.getFieldSlot(), g_eeGeneral.ownerRegistrationID, PXX2_LEN_REGISTRATION_ID);
+  grid.nextLine();
+#endif
+
   // Country code
   new StaticText(window, grid.getLabelSlot(), STR_COUNTRYCODE);
   new Choice(window, grid.getFieldSlot(), STR_COUNTRYCODES, 0, 2, GET_SET_DEFAULT(g_eeGeneral.countryCode));
