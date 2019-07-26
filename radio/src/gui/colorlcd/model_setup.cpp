@@ -507,7 +507,7 @@ class ModuleWindow : public Window {
                                   moduleChoice->setFocus();
                                 });
       moduleChoice->setAvailableHandler([=](int8_t moduleType) {
-        return isInternalModuleAvailable(moduleType);
+          return moduleIdx == INTERNAL_MODULE ? isInternalModuleAvailable(moduleType) : isExternalModuleAvailable(moduleType);
       });
       FormField::link(previousField, moduleChoice);
 
@@ -549,7 +549,7 @@ class ModuleWindow : public Window {
         new StaticText(this, grid.getLabelSlot(true), STR_RF_PROTOCOL);
 
         int multiRfProto = g_model.moduleData[moduleIdx].multi.customProto == 1 ? MODULE_SUBTYPE_MULTI_CUSTOM : g_model.moduleData[moduleIdx].getMultiProtocol(false);
-        if (g_model.moduleData[EXTERNAL_MODULE].multi.customProto) {
+        if (g_model.moduleData[moduleIdx].multi.customProto) {
           new StaticText(this, grid.getFieldSlot(3, 0), STR_MULTI_CUSTOM);
         }
         else {

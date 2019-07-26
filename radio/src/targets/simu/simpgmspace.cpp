@@ -464,7 +464,7 @@ uint32_t pwrPressed()
 {
   // TODO: simulate power button
 #if defined(PWR_SWITCH_GPIO)  // STM32
-  return GPIO_ReadInputDataBit(PWR_SWITCH_GPIO, PWR_SWITCH_GPIO_PIN) == Bit_RESET;
+  return false;
 #elif defined(PIO_PC17)       // AT91SAM3
   return PIOC->PIO_PDSR & PIO_PC17;
 #else

@@ -168,7 +168,7 @@ void editTimerMode(int timerIdx, coord_t y, LcdFlags attr, event_t event)
       case 0:
       {
         swsrc_t timerMode = timer.mode;
-        CHECK_INCDEC_MODELVAR_CHECK(event, timerMode, -TMRMODE_COUNT-SWSRC_LAST+1, TMRMODE_COUNT+SWSRC_LAST-1, isSwitchAvailableInTimers);
+        // TODO later CHECK_INCDEC_MODELVAR_CHECK(event, timerMode, -TMRMODE_COUNT-SWSRC_LAST+1, TMRMODE_COUNT+SWSRC_LAST-1, isSwitchAvailableInTimers);
         if (timerMode < 0) timerMode += TMRMODE_COUNT-1;
         timer.mode = timerMode;
 #if defined(AUTOSWITCH)
