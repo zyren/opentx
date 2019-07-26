@@ -2039,7 +2039,7 @@ uint32_t pwrPressedDuration()
 
 uint32_t pwrCheck()
 {
-  const char * message = "";
+  const char * message = nullptr;
 
   enum PwrCheckState {
     PWR_CHECK_ON,
@@ -2064,9 +2064,6 @@ uint32_t pwrCheck()
       if (message && !g_eeGeneral.disableRssiPoweroffAlarm) {
         audioEvent(AU_MODEL_STILL_POWERED);
       }
-#if defined(COLORLCD)
-      mainWindow.setShutdown(message);
-#endif
     }
     else {
       inactivity.counter = 0;
@@ -2105,19 +2102,18 @@ uint32_t pwrCheck()
         return e_power_off;
       }
       else {
-#if !defined(COLORLCD)
         drawShutdownAnimation(pwrPressedDuration(), message);
-#endif
         return e_power_press;
       }
     }
   }
   else {
+#if defined(COLORLCD)
+    if (pwr_press_time != 0)
+      mainWindow.invalidate();
+#endif
     pwr_check_state = PWR_CHECK_ON;
     pwr_press_time = 0;
-#if defined(COLORLCD)
-    mainWindow.setShutdown(nullptr);
-#endif
   }
 
   return e_power_on;

@@ -30,7 +30,7 @@
 class MainWindow: public Window {
   public:
     MainWindow():
-      Window(nullptr, {0, 0, LCD_W, LCD_H}, PAINT_CHILDREN_FIRST),
+      Window(nullptr, {0, 0, LCD_W, LCD_H}),
       invalidatedRect(rect)
     {
     }
@@ -49,18 +49,11 @@ class MainWindow: public Window {
       invalidate({0, 0, rect.w, rect.h});
     }
 
-    void paint(BitmapBuffer * dc) override;
-
     void invalidate(const rect_t & rect) override;
 
     bool refresh();
 
     void run(bool trash=true);
-
-    void setShutdown(const char * message = "")
-    {
-      shutdown = message;
-    }
 
   protected:
     void emptyTrash();

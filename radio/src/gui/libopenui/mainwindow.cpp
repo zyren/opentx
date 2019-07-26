@@ -112,10 +112,3 @@ void MainWindow::run(bool trash)
     lcdRefresh();
   }
 }
-
-void MainWindow::paint(BitmapBuffer * dc)
-{
-  if (shutdown) {
-    drawShutdownAnimation(dc, pwrPressedDuration(), shutdown);
-  }
-}
