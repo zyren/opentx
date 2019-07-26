@@ -41,7 +41,7 @@ constexpr uint32_t DEFAULT_SCROLLBAR_X =           LCD_W - 10;
 constexpr uint32_t DEFAULT_SCROLLBAR_Y =           MENU_CONTENT_TOP;
 constexpr uint32_t DEFAULT_SCROLLBAR_H =           MENU_FOOTER_TOP - DEFAULT_SCROLLBAR_Y - 6;
 
-constexpr uint32_t PAGE_PADDING =                  2;
+constexpr uint32_t PAGE_PADDING =                  6;
 constexpr uint32_t PAGE_LINE_HEIGHT =              20;
 constexpr uint32_t PAGE_LINE_SPACING =             2;
 constexpr uint32_t PAGE_INDENT_WIDTH =             10;

@@ -63,8 +63,6 @@ class CommonInputOrMixButton : public Button {
   protected:
     uint8_t index;
     bool active = false;
-    static constexpr coord_t line1 = 2;
-    static constexpr coord_t line2 = 22;
 };
 
 

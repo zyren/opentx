@@ -289,17 +289,17 @@ void CommonInputOrMixButton::checkEvents()
 
 void CommonInputOrMixButton::drawFlightModes(BitmapBuffer *dc, FlightModesType value)
 {
-  dc->drawBitmap(146, line2 + 2, mixerSetupFlightmodeBitmap);
+  dc->drawBitmap(146, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, mixerSetupFlightmodeBitmap);
   coord_t x = 166;
   for (int i = 0; i < MAX_FLIGHT_MODES; i++) {
     char s[] = " ";
     s[0] = '0' + i;
     if (value & (1 << i)) {
-      dc->drawText(x, line2 + 1, s, SMLSIZE | TEXT_DISABLE_COLOR);
+      dc->drawText(x, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, s, SMLSIZE | TEXT_DISABLE_COLOR);
     }
     else {
-      dc->drawSolidFilledRect(x, 40, 8, 3, SCROLLBOX_COLOR);
-      dc->drawText(x, line2 + 1, s, SMLSIZE);
+      dc->drawSolidFilledRect(x, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, 8, 3, SCROLLBOX_COLOR);
+      dc->drawText(x, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, s, SMLSIZE);
     }
     x += 8;
   }
@@ -344,13 +344,13 @@ class InputLineButton : public CommonInputOrMixButton {
 
       // second line ...
       if (line.swtch) {
-        dc->drawMask(3, line2 + FIELD_PADDING_TOP, mixerSetupSwitchIcon, TEXT_COLOR);
-        drawSwitch(dc, 21, line2 + FIELD_PADDING_TOP, line.swtch);
+        dc->drawMask(3, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, mixerSetupSwitchIcon, TEXT_COLOR);
+        drawSwitch(dc, 21, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, line.swtch);
       }
 
       if (line.curve.value != 0 ) {
-        dc->drawBitmap(60, line2 + FIELD_PADDING_TOP, mixerSetupCurveBitmap);
-        drawCurveRef(dc, 80, line2 + FIELD_PADDING_TOP, line.curve);
+        dc->drawBitmap(60, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, mixerSetupCurveBitmap);
+        drawCurveRef(dc, 80, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, line.curve);
       }
 
       if (line.flightModes) {
@@ -493,6 +493,7 @@ void ModelInputsPage::build(FormWindow * window, int8_t focusIndex)
 
   grid.nextLine();
 
+  window->setLastField();
   window->setInnerHeight(grid.getWindowHeight());
 }
 

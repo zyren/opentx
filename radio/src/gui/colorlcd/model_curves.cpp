@@ -193,16 +193,17 @@ void ModelCurvesPage::editCurve(FormWindow * window, uint8_t curve)
 void ModelCurvesPage::build(FormWindow * window, int8_t focusIndex)
 {
   FormGridLayout grid;
-  grid.spacer(8);
-  grid.setLabelWidth(70);
+  grid.spacer(PAGE_PADDING);
+  grid.setLabelWidth(66);
 
   for (uint8_t index = 0; index < MAX_CURVES; index++) {
     CurveInfo &curve = g_model.curves[index];
     int8_t * points = curveAddress(index);
 
-    auto label = new TextButton(window, grid.getLabelSlot(), getCurveString(1 + index));
-    window->setFirstField(label);
+    // Curve label
+    new StaticText(window, grid.getLabelSlot(), getCurveString(1 + index), BUTTON_BACKGROUND | CENTERED);
 
+    // Curve drawing
     Button * button = new CurveButton(window, grid.getFieldSlot(), index);
     button->setPressHandler([=]() -> uint8_t {
       Menu * menu = new Menu();
@@ -256,5 +257,6 @@ void ModelCurvesPage::build(FormWindow * window, int8_t focusIndex)
 
   grid.nextLine();
 
+  window->setLastField();
   window->setInnerHeight(grid.getWindowHeight());
 }

@@ -261,13 +261,13 @@ class MixLineButton : public CommonInputOrMixButton {
 
       // second line ...
       if (line.swtch) {
-        dc->drawBitmap(3, line2 + FIELD_PADDING_TOP, mixerSetupSwitchBitmap);
-        drawSwitch(dc, 21, line2, line.swtch);
+        dc->drawBitmap(3, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, mixerSetupSwitchBitmap);
+        drawSwitch(dc, 21, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, line.swtch);
       }
 
       if (line.curve.value) {
-        dc->drawBitmap(60, line2 + FIELD_PADDING_TOP, mixerSetupCurveBitmap);
-        drawCurveRef(dc, 80, line2, line.curve, 0);
+        dc->drawBitmap(60, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, mixerSetupCurveBitmap);
+        drawCurveRef(dc, 80, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, line.curve, 0);
       }
 
       if (line.flightModes) {
@@ -440,6 +440,7 @@ void ModelMixesPage::build(FormWindow * window, int8_t focusMixIndex)
 
   grid.nextLine();
 
+  window->setLastField();
   window->setInnerHeight(grid.getWindowHeight());
 }
 

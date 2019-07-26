@@ -107,9 +107,6 @@ class OutputEditWindow : public Page {
     }
 };
 
-static constexpr coord_t line1 = 3;
-static constexpr coord_t line2 = 22;
-
 class OutputLineButton : public Button {
   public:
     OutputLineButton(Window * parent, const rect_t &rect, LimitData * output) :
@@ -117,30 +114,30 @@ class OutputLineButton : public Button {
       output(output)
     {
       if (output->revert || output->curve || output->name[0]) {
-        setHeight(getHeight() + 20);
+        setHeight(getHeight() + PAGE_LINE_HEIGHT);
       }
     }
 
     virtual void paint(BitmapBuffer * dc) override
     {
       // first line
-      drawNumber(dc, 4, line1, output->min - 1000, SMLSIZE | PREC1);
-      drawNumber(dc, 68, line1, output->max + 1000, SMLSIZE | PREC1);
-      drawNumber(dc, 132, line1, output->offset, SMLSIZE | PREC1);
-      drawNumber(dc, 226, line1, PPM_CENTER + output->ppmCenter, SMLSIZE | RIGHT);
-      dc->drawText(228, line1 - 3, output->symetrical ? "=" : "\306");
+      drawNumber(dc, FIELD_PADDING_LEFT, FIELD_PADDING_TOP, output->min - 1000, PREC1);
+      drawNumber(dc, 68, FIELD_PADDING_TOP, output->max + 1000, PREC1);
+      drawNumber(dc, 132, FIELD_PADDING_TOP, output->offset, PREC1);
+      drawNumber(dc, 226, FIELD_PADDING_TOP, PPM_CENTER + output->ppmCenter, RIGHT);
+      dc->drawText(228, FIELD_PADDING_TOP - 3, output->symetrical ? "=" : "\306");
 
       // second line
       if (output->revert) {
-        drawTextAtIndex(dc, 4, line2, STR_MMMINV, output->revert);
+        drawTextAtIndex(dc, 4, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, STR_MMMINV, output->revert);
       }
       if (output->curve) {
-        dc->drawBitmap(68, line2 + 2, mixerSetupCurveBitmap);
-        dc->drawText(88, line2, getCurveString(output->curve));
+        dc->drawBitmap(68, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, mixerSetupCurveBitmap);
+        dc->drawText(88, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, getCurveString(output->curve));
       }
       if (output->name[0]) {
-        dc->drawBitmap(146, line2 + 2, mixerSetupLabelBitmap);
-        dc->drawSizedText(166, line2, output->name, sizeof(output->name), ZCHAR);
+        dc->drawBitmap(146, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, mixerSetupLabelBitmap);
+        dc->drawSizedText(166, PAGE_LINE_HEIGHT + FIELD_PADDING_TOP, output->name, sizeof(output->name), ZCHAR);
       }
 
       // bounding rect
@@ -167,20 +164,16 @@ void ModelOutputsPage::rebuild(FormWindow * window, int8_t focusChannel)
 void ModelOutputsPage::build(FormWindow * window, int8_t focusChannel)
 {
   FormGridLayout grid;
-  grid.spacer(8);
+  grid.spacer(PAGE_PADDING);
   grid.setLabelWidth(66);
 
   for (uint8_t ch = 0; ch < MAX_OUTPUT_CHANNELS; ch++) {
     LimitData * output = limitAddress(ch);
 
-    auto label = new TextButton(window, grid.getLabelSlot(), getSourceString(MIXSRC_CH1 + ch),
-                   [=]() -> uint8_t {
-                     return 0;
-                   });
-    if (ch == 0) {
-      window->setFirstField(label);
-    }
+    // Channel label
+    new StaticText(window, grid.getLabelSlot(), getSourceString(MIXSRC_CH1 + ch), BUTTON_BACKGROUND | CENTERED);
 
+    // Channel settings
     Button * button = new OutputLineButton(window, grid.getFieldSlot(), output);
     button->setPressHandler([=]() -> uint8_t {
       Menu * menu = new Menu();
@@ -220,6 +213,7 @@ void ModelOutputsPage::build(FormWindow * window, int8_t focusChannel)
 
   grid.nextLine();
 
+  window->setLastField();
   window->setInnerHeight(grid.getWindowHeight());
 }
 

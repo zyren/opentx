@@ -336,14 +336,12 @@ void ModelLogicalSwitchesPage::build(FormWindow * window, int8_t focusIndex)
 {
   FormGridLayout grid;
   grid.spacer(PAGE_PADDING);
-  grid.setLabelWidth(70);
+  grid.setLabelWidth(66);
 
   for (uint8_t i=0; i<MAX_LOGICAL_SWITCHES; i++) {
     LogicalSwitchData * ls = lswAddress(i);
     if (ls->func == LS_FUNC_NONE) {
       auto label = new TextButton(window, grid.getLabelSlot(), getSwitchString(SWSRC_SW1+i));
-      if (!window->getFirstField())
-        window->setFirstField(label);
       grid.spacer(label->height() + 5);
     }
     else {
@@ -374,9 +372,6 @@ void ModelLogicalSwitchesPage::build(FormWindow * window, int8_t focusIndex)
                                                       });
                                                     return 0;
                                                 });
-      if (!window->getFirstField())
-        window->setFirstField(button);
-
       if (focusIndex == i) {
         button->setFocus();
       }
@@ -387,5 +382,6 @@ void ModelLogicalSwitchesPage::build(FormWindow * window, int8_t focusIndex)
 
   grid.nextLine();
 
+  window->setLastField();
   window->setInnerHeight(grid.getWindowHeight());
 }
