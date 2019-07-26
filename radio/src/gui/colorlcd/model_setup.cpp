@@ -543,6 +543,43 @@ class ModuleWindow : public Window {
                                   rfChoice->setFocus();
                               });
       }
+      else if (isModuleMultimodule(moduleIdx)) {
+        grid.nextLine();
+        new StaticText(this, grid.getLabelSlot(true), STR_RF_PROTOCOL);
+
+        int multiRfProto = g_model.moduleData[moduleIdx].multi.customProto == 1 ? MODULE_SUBTYPE_MULTI_CUSTOM : g_model.moduleData[moduleIdx].getMultiProtocol(false);
+        rfChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_MULTI_PROTOCOLS, MODULE_SUBTYPE_MULTI_FIRST, MODULE_SUBTYPE_MULTI_LAST,
+                              GET_DEFAULT(multiRfProto),
+                              [=](int32_t newValue) {
+                                g_model.moduleData[moduleIdx].multi.customProto = (newValue == MODULE_SUBTYPE_MULTI_CUSTOM);
+                                if (!g_model.moduleData[moduleIdx].multi.customProto)
+                                  g_model.moduleData[moduleIdx].setMultiProtocol(newValue);
+                                g_model.moduleData[moduleIdx].subType = 0;
+                                // Sensible default for DSM2 (same as for ppm): 7ch@22ms + Autodetect settings enabled
+                                if (g_model.moduleData[moduleIdx].getMultiProtocol(true) == MODULE_SUBTYPE_MULTI_DSM2) {
+                                  g_model.moduleData[moduleIdx].multi.autoBindMode = 1;
+                                }
+                                else {
+                                  g_model.moduleData[moduleIdx].multi.autoBindMode = 0;
+                                }
+                                g_model.moduleData[moduleIdx].multi.optionValue = 0;
+                                SET_DIRTY();
+                                update();
+                                rfChoice->setFocus();
+                              });
+
+        const mm_protocol_definition *pdef = getMultiProtocolDefinition(g_model.moduleData[moduleIdx].multi.customProto == 1 ? MODULE_SUBTYPE_MULTI_CUSTOM : g_model.moduleData[moduleIdx].getMultiProtocol(false));
+        if (pdef->subTypeString != nullptr) {
+          rfChoice = new Choice(this, grid.getFieldSlot(2, 1), pdef->subTypeString, 0, pdef->maxSubtype,
+                                GET_DEFAULT(g_model.moduleData[moduleIdx].subType),
+                                [=](int32_t newValue) {
+                                  g_model.moduleData[moduleIdx].subType = newValue;
+                                  SET_DIRTY();
+                                  update();
+                                  rfChoice->setFocus();
+                                });
+        }
+      }
       grid.nextLine();
 
       // Channel Range

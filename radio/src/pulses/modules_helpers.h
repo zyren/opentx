@@ -32,7 +32,7 @@
 #if defined(MULTIMODULE)
 inline bool isModuleMultimodule(uint8_t idx)
 {
-  return idx == EXTERNAL_MODULE && g_model.moduleData[EXTERNAL_MODULE].type == MODULE_TYPE_MULTIMODULE;
+  return g_model.moduleData[idx].type == MODULE_TYPE_MULTIMODULE;
 }
 
 inline bool isModuleMultimoduleDSM2(uint8_t idx)
