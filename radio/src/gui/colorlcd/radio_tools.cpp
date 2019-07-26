@@ -156,7 +156,7 @@ void RadioToolsPage::rebuild(FormWindow * window)
           label = getBasename(path);
         }
         new StaticText(window, grid.getLabelSlot(), "lua", BUTTON_BACKGROUND | CENTERED);
-        auto button = new TextButton(window, grid.getFieldSlot(1), label, [=]() -> uint8_t {
+        new TextButton(window, grid.getFieldSlot(1), label, [=]() -> uint8_t {
           f_chdir("/SCRIPTS/TOOLS/");
           //luaExec(path);
           return 0;
@@ -206,8 +206,6 @@ void RadioToolsPage::rebuild(FormWindow * window)
     grid.nextLine();
   }
 #endif
-
-  window->setLastField();
 
   window->setInnerHeight(grid.getWindowHeight());
 }
