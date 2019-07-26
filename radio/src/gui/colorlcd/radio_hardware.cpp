@@ -82,7 +82,11 @@ RadioHardwarePage::RadioHardwarePage():
 void RadioHardwarePage::build(FormWindow * window)
 {
   FormGridLayout grid;
+#if LCD_W > LCD_H
   grid.setLabelWidth(130);
+#else
+  grid.setLabelWidth(100);
+#endif
   grid.spacer(6);
 
   // Calibration
@@ -133,8 +137,11 @@ void RadioHardwarePage::build(FormWindow * window)
                });
     grid.nextLine();
   }
-
+#if LCD_W > LCD_H
   grid.setLabelWidth(180);
+#else
+  grid.setLabelWidth(130);
+#endif
 
   // ADC filter
   new StaticText(window, grid.getLabelSlot(), STR_JITTER_FILTER);
