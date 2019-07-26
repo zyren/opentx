@@ -51,6 +51,11 @@ void MenuWindow::onKeyEvent(event_t event)
     Window::onKeyEvent(event); // the window above will be closed on event
     lines[selectedIndex].onPress();
   }
+  else if (event == EVT_KEY_BREAK(KEY_EXIT)) {
+    if (onCancel)
+      onCancel();
+    Window::onKeyEvent(event);
+  }
   else {
     Window::onKeyEvent(event);
   }

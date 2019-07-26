@@ -188,14 +188,14 @@ class RegisterDialog: public Dialog {
       exitButton->setFocus();
       FormField::link(exitButton, edit);
 
-      startRegister();
+      start();
 
       setCloseHandler([=]() {
           moduleState[moduleIdx].mode = MODULE_MODE_NORMAL;
       });
     }
 
-    void startRegister()
+    void start()
     {
       memclear(&reusableBuffer.moduleSetup.pxx2, sizeof(reusableBuffer.moduleSetup.pxx2));
       moduleState[moduleIdx].mode = MODULE_MODE_REGISTER;
@@ -220,6 +220,10 @@ class RegisterDialog: public Dialog {
         FormField::link(okButton, exitButton);
         okButton->setFocus();
       }
+      else if (reusableBuffer.moduleSetup.pxx2.registerStep == REGISTER_OK) {
+        deleteLater();
+        POPUP_INFORMATION(STR_REG_OK);
+      }
 
       Dialog::checkEvents();
     }
@@ -230,6 +234,35 @@ class RegisterDialog: public Dialog {
     StaticText * waiting;
     TextEdit * rxName = nullptr;
     TextButton * exitButton;
+};
+
+class BindWaitDialog: public Dialog {
+  public:
+    BindWaitDialog(uint8_t moduleIdx, uint8_t receiverIdx):
+            Dialog(STR_BIND, {50, 73, LCD_W - 100, LCD_H - 146}),
+            moduleIdx(moduleIdx),
+            receiverIdx(receiverIdx)
+    {
+      new StaticText(this, {0, height() / 2, width(), PAGE_LINE_HEIGHT}, STR_WAITING_FOR_RX, CENTERED);
+    }
+
+    void checkEvents() override;
+
+#if defined(HARDWARE_KEYS)
+    void onKeyEvent(event_t event) override
+    {
+      TRACE_WINDOWS("%s received event 0x%X", getWindowDebugString().c_str(), event);
+
+      if (event == EVT_KEY_BREAK(KEY_EXIT)) {
+        moduleState[moduleIdx].mode = MODULE_MODE_NORMAL;
+        deleteLater();
+      }
+    }
+#endif
+
+  protected:
+    uint8_t moduleIdx;
+    uint8_t receiverIdx;
 };
 
 class BindRxChoiceMenu: public Menu {
@@ -264,14 +297,14 @@ class BindRxChoiceMenu: public Menu {
               new MessageDialog(STR_BIND, STR_BIND_OK);
 #else
               reusableBuffer.moduleSetup.bindInformation.step = BIND_START;
+              new BindWaitDialog(moduleIdx, receiverIdx);
 #endif
             }
         });
       }
 
-      setCloseHandler([=]() {
+      setCancelHandler([=]() {
           moduleState[moduleIdx].mode = MODULE_MODE_NORMAL;
-          removePXX2ReceiverIfEmpty(moduleIdx, receiverIdx);
       });
     }
 
@@ -280,75 +313,36 @@ class BindRxChoiceMenu: public Menu {
     uint8_t receiverIdx;
 };
 
-class BindWaitDialog: public Dialog {
-  public:
-    BindWaitDialog(uint8_t moduleIdx, uint8_t receiverIdx):
-      Dialog(STR_BIND, {50, 73, LCD_W - 100, LCD_H - 146}),
-      moduleIdx(moduleIdx),
-      receiverIdx(receiverIdx)
-    {
-      new StaticText(this, {0, height() / 2, width(), PAGE_LINE_HEIGHT}, STR_WAITING_FOR_RX, CENTERED);
-      startBind();
-      setCloseHandler([=]() {
-          moduleState[moduleIdx].mode = MODULE_MODE_NORMAL;
-      });
-    }
+void BindWaitDialog::checkEvents()
+{
+  if (moduleState[moduleIdx].mode == MODULE_MODE_NORMAL) {
+    removePXX2ReceiverIfEmpty(moduleIdx, receiverIdx);
+    deleteLater();
+    if (reusableBuffer.moduleSetup.bindInformation.step == BIND_OK)
+      POPUP_INFORMATION(STR_BIND_OK);
+    return;
+  }
 
-    void startBind()
-    {
-      memclear(&reusableBuffer.moduleSetup.bindInformation, sizeof(BindInformation));
-      reusableBuffer.moduleSetup.bindInformation.rxUid = receiverIdx;
-      if (isModuleR9MAccess(moduleIdx)) {
-#if defined(SIMU)
-        reusableBuffer.moduleSetup.pxx2.moduleInformation.information.modelID = 1;
-        reusableBuffer.moduleSetup.pxx2.moduleInformation.information.variant = 2;
-#else
-        moduleState[moduleIdx].readModuleInformation(&reusableBuffer.moduleSetup.pxx2.moduleInformation, PXX2_HW_INFO_TX_ID, PXX2_HW_INFO_TX_ID);
-#endif
-      }
-      else {
-        moduleState[moduleIdx].startBind(&reusableBuffer.moduleSetup.bindInformation);
-      }
-    }
+  if (reusableBuffer.moduleSetup.bindInformation.step == BIND_INIT && reusableBuffer.moduleSetup.bindInformation.candidateReceiversCount > 0) {
+    deleteLater();
+    new BindRxChoiceMenu(moduleIdx, receiverIdx);
+    return;
+  }
 
-    void checkEvents() override
-    {
-      if (reusableBuffer.moduleSetup.bindInformation.candidateReceiversCount > 0) {
-        Dialog::deleteLater();
-        new BindRxChoiceMenu(moduleIdx, receiverIdx);
-      }
-      else {
-        Dialog::checkEvents();
-      }
-    }
-
-#if defined(HARDWARE_KEYS)
-    void onKeyEvent(event_t event) override
-    {
-      TRACE_WINDOWS("%s received event 0x%X", getWindowDebugString().c_str(), event);
-
-      if (event == EVT_KEY_BREAK(KEY_EXIT)) {
-        deleteLater();
-      }
-    }
-#endif
-
-  protected:
-    uint8_t moduleIdx;
-    uint8_t receiverIdx;
-};
+  Dialog::checkEvents();
+}
 
 class ReceiverButton: public TextButton {
   public:
     ReceiverButton(Window * parent, rect_t rect, uint8_t moduleIdx, uint8_t receiverIdx):
       TextButton(parent, rect, STR_BIND, [=]() {
           if (g_model.moduleData[moduleIdx].pxx2.receiverName[receiverIdx][0] == '\0') {
-            new BindWaitDialog(moduleIdx, receiverIdx);
+            startBind();
           }
           else {
             auto menu = new Menu();
             menu->addLine(STR_BIND, [=]() {
-                new BindWaitDialog(moduleIdx, receiverIdx);
+                startBind();
                 return 0;
             });
             menu->addLine(STR_OPTIONS, [=]() {
@@ -392,6 +386,25 @@ class ReceiverButton: public TextButton {
       moduleIdx(moduleIdx),
       receiverIdx(receiverIdx)
     {
+    }
+
+    void startBind()
+    {
+      memclear(&reusableBuffer.moduleSetup.bindInformation, sizeof(BindInformation));
+      reusableBuffer.moduleSetup.bindInformation.rxUid = receiverIdx;
+      if (isModuleR9MAccess(moduleIdx)) {
+#if defined(SIMU)
+        reusableBuffer.moduleSetup.pxx2.moduleInformation.information.modelID = 1;
+        reusableBuffer.moduleSetup.pxx2.moduleInformation.information.variant = 2;
+#else
+        moduleState[moduleIdx].readModuleInformation(&reusableBuffer.moduleSetup.pxx2.moduleInformation, PXX2_HW_INFO_TX_ID, PXX2_HW_INFO_TX_ID);
+#endif
+      }
+      else {
+        moduleState[moduleIdx].startBind(&reusableBuffer.moduleSetup.bindInformation);
+      }
+
+      new BindWaitDialog(moduleIdx, receiverIdx);
     }
 
     void checkEvents() override

@@ -48,7 +48,8 @@ class DateTimeWindow : public Window {
       }
     }
 
-    FormField * getFirstField() {
+    FormField * getFirstField()
+    {
       return firstField;
     }
 
@@ -181,6 +182,7 @@ void RadioSetupPage::build(FormWindow * window)
   // Date and Time
   auto timeWindow = new DateTimeWindow(window, {0, grid.getWindowHeight(), LCD_W, 0});
   grid.addWindow(timeWindow);
+  window->setFirstField(timeWindow->getFirstField());
 
   // Batt meter range - Range 3.0v to 16v
   new StaticText(window, grid.getLabelSlot(), STR_BATTERY_RANGE);

@@ -20,6 +20,7 @@
 
 #include "lcd.h"
 #include "mainwindow.h"
+#include "colorlcd/draw_functions.h"
 
 #if defined(HARDWARE_TOUCH)
 #include "touch_driver.h"
@@ -38,7 +39,6 @@ void MainWindow::emptyTrash()
   }
   trash.clear();
 }
-
 
 void MainWindow::checkEvents(bool trash)
 {
@@ -110,5 +110,12 @@ void MainWindow::run(bool trash)
   checkEvents(trash);
   if (refresh()) {
     lcdRefresh();
+  }
+}
+
+void MainWindow::paint(BitmapBuffer * dc)
+{
+  if (shutdown) {
+    drawShutdownAnimation(dc, pwrPressedDuration(), shutdown);
   }
 }

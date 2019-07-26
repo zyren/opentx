@@ -18,8 +18,8 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _WIDGETS_H_
-#define _WIDGETS_H_
+#ifndef _DRAW_FUNCTIONS_H_
+#define _DRAW_FUNCTIONS_H_
 
 #include "opentx.h"
 #include <stdio.h>
@@ -63,14 +63,12 @@ inline void drawChn(BitmapBuffer * dc, coord_t x, coord_t y, uint8_t idx, LcdFla
 }
 
 // Screen templates
-void drawMenuTemplate(const char * title, uint8_t icon, const uint8_t * icons=NULL, uint32_t options=0);
 void drawSplash();
 void drawSleepBitmap();
-void drawShutdownAnimation(uint32_t index, const char * message);
+void drawShutdownAnimation(BitmapBuffer * dc, uint32_t index, const char * message);
 
 // Main view standard widgets
-void drawTopBar();
 void drawMainPots();
 void drawTrims(uint8_t flightMode);
 
-#endif // _WIDGETS_H_
+#endif // _DRAW_FUNCTIONS_H_

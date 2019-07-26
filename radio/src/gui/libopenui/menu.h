@@ -63,6 +63,11 @@ class MenuWindow: public Window {
     }
 #endif
 
+    void setCancelHandler(std::function<void()> handler)
+    {
+      onCancel = handler;
+    }
+
     void addLine(const std::string & text, std::function<void()> onPress)
     {
       lines.emplace_back(text, onPress);
@@ -94,6 +99,7 @@ class MenuWindow: public Window {
 #else
     int selectedIndex = 0;
 #endif
+    std::function<void()> onCancel;
     static constexpr uint8_t maxLines = 7; // TODO NV14 was 8
     static constexpr uint8_t lineHeight = 30; // TODO NV14 was 40
 };
@@ -114,11 +120,13 @@ class Menu : public Window {
       delete toolbar;
     }
 
+    void setCancelHandler(std::function<void()> handler)
+    {
+      menuWindow.setCancelHandler(handler);
+    }
+
     void deleteLater()
     {
-      if (closeHandler)
-        closeHandler();
-
 #if !defined(HARDWARE_TOUCH)
       if (previousFocus) {
         previousFocus->setFocus();

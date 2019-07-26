@@ -112,10 +112,14 @@ class FormGroup: public FormField {
 
     inline void setLastField(FormField * field = nullptr)
     {
+      // by default the current field is the last one
       if (!field)
         field = getCurrentField();
+
       FormField::link(field, first);
-      // FormField::setCurrentField(this);
+
+      // now the current field is the group, it will be linked to the next one
+      FormField::setCurrentField(this);
     }
 
     FormField * getFirstField()

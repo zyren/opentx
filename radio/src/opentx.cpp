@@ -977,6 +977,19 @@ bool isThrottleWarningAlertNeeded()
   return v > THRCHK_DEADBAND - 1024;
 }
 
+#if defined(COLORLCD)
+void checkThrottleStick()
+{
+  if (isThrottleWarningAlertNeeded()) {
+    AUDIO_ERROR_MESSAGE(AU_THROTTLE_ALERT);
+    auto dialog = new FullScreenDialog(WARNING_TYPE_ALERT, STR_THROTTLEWARN, STR_THROTTLENOTIDLE);
+    dialog->setCloseCondition([]() {
+        return !isThrottleWarningAlertNeeded();
+    });
+    dialog->runForever();
+  }
+}
+#else
 void checkThrottleStick()
 {
   if (!isThrottleWarningAlertNeeded()) {
@@ -993,6 +1006,7 @@ void checkThrottleStick()
 
   while (!getEvent()) {
     if (!isThrottleWarningAlertNeeded()) {
+      TRACE("Plus needed");
       return;
     }
 
@@ -1021,8 +1035,11 @@ void checkThrottleStick()
     RTOS_WAIT_MS(10);
   }
 
+  TRACE("Event");
+
   LED_ERROR_END();
 }
+#endif
 
 void checkAlarm() // added by Gohst
 {
@@ -2007,7 +2024,6 @@ int main()
   tasksStart();
 }
 
-#if !defined(SIMU)
 #if defined(PWR_BUTTON_PRESS)
 uint32_t pwr_press_time = 0;
 
@@ -2023,7 +2039,7 @@ uint32_t pwrPressedDuration()
 
 uint32_t pwrCheck()
 {
-  const char * message = NULL;
+  const char * message = "";
 
   enum PwrCheckState {
     PWR_CHECK_ON,
@@ -2048,6 +2064,9 @@ uint32_t pwrCheck()
       if (message && !g_eeGeneral.disableRssiPoweroffAlarm) {
         audioEvent(AU_MODEL_STILL_POWERED);
       }
+#if defined(COLORLCD)
+      mainWindow.setShutdown(message);
+#endif
     }
     else {
       inactivity.counter = 0;
@@ -2060,13 +2079,10 @@ uint32_t pwrCheck()
 #else
         while ((TELEMETRY_STREAMING() && !g_eeGeneral.disableRssiPoweroffAlarm)) {
 #endif
+
+#if !defined(COLORLCD)
           lcdRefreshWait();
           lcdClear();
-
-#if defined(COLORLCD)
-#warning "Model shutdown confirmation"
-          return e_power_off;
-#else
           POPUP_CONFIRMATION(STR_MODEL_SHUTDOWN, nullptr);
           SET_WARNING_INFO(STR_MODEL_STILL_POWERED, sizeof(TR_MODEL_STILL_POWERED), 0);
           event_t evt = getEvent(false);
@@ -2089,7 +2105,9 @@ uint32_t pwrCheck()
         return e_power_off;
       }
       else {
+#if !defined(COLORLCD)
         drawShutdownAnimation(pwrPressedDuration(), message);
+#endif
         return e_power_press;
       }
     }
@@ -2097,6 +2115,9 @@ uint32_t pwrCheck()
   else {
     pwr_check_state = PWR_CHECK_ON;
     pwr_press_time = 0;
+#if defined(COLORLCD)
+    mainWindow.setShutdown(nullptr);
+#endif
   }
 
   return e_power_on;
@@ -2139,4 +2160,3 @@ uint32_t pwrCheck()
   return e_power_off;
 }
 #endif  // defined(PWR_BUTTON_PRESS)
-#endif  // !defined(SIMU)

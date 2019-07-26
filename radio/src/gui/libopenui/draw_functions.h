@@ -18,8 +18,8 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _DRAW_FUNCTIONS_H_
-#define _DRAW_FUNCTIONS_H_
+#ifndef _LIBOPENUI_DRAW_FUNCTIONS_H_
+#define _LIBOPENUI_DRAW_FUNCTIONS_H_
 
 #include <stdint.h>
 #include "libopenui_types.h"
@@ -31,4 +31,4 @@ void drawSource(BitmapBuffer * dc, coord_t x, coord_t y, mixsrc_t idx, LcdFlags 
 void drawSwitch(BitmapBuffer * dc, coord_t x, coord_t y, int32_t idx, LcdFlags flags=0);
 void drawTrimMode(BitmapBuffer * dc, coord_t x, coord_t y, uint8_t phase, uint8_t idx, LcdFlags flags = 0);
 
-#endif // _DRAW_FUNCTIONS_H_
+#endif // _LIBOPENUI_DRAW_FUNCTIONS_H_

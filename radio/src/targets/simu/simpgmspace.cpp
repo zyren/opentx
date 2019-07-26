@@ -449,12 +449,12 @@ int lcdRestoreBackupBuffer()
   memcpy(displayBuf, simuLcdBackupBuf, sizeof(displayBuf));
   return 1;
 }
-
-uint32_t pwrCheck()
-{
-  // TODO: ability to simulate shutdown warning for a "soft" simulator restart
-  return simu_shutdown ? e_power_off : e_power_on;
-}
+//
+//uint32_t pwrCheck()
+//{
+//  // TODO: ability to simulate shutdown warning for a "soft" simulator restart
+//  return simu_shutdown ? e_power_off : e_power_on;
+//}
 
 void pwrOff()
 {

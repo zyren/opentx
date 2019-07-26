@@ -21,6 +21,8 @@
 #include "radio_spectrum_analyser.h"
 #include "opentx.h"
 
+#define SPECTRUM_HEIGHT  200
+
 class SpectrumWindow : public Window
 {
   public:
@@ -39,15 +41,15 @@ class SpectrumWindow : public Window
       coord_t peak_y = 1;
       coord_t peak_x = 0;
       for (coord_t i = 0; i < LCD_W; i++) {
-        coord_t h = min<coord_t >(reusableBuffer.spectrumAnalyser.bars[i] >> 1, LCD_H);
+        coord_t h = min<coord_t >(reusableBuffer.spectrumAnalyser.bars[i], SPECTRUM_HEIGHT);
         if (h > peak_y) {
           peak_x = i;
           peak_y = h;
         }
-        dc->drawVerticalLine(i, LCD_H - h, h, SOLID, 0);
+        dc->drawVerticalLine(i, SPECTRUM_HEIGHT - h, h, SOLID, 0);
       }
 
-      coord_t y = max<coord_t>(FH, LCD_H - peak_y - FH);
+      coord_t y = max<coord_t>(FH, SPECTRUM_HEIGHT - peak_y - FH);
       drawNumber(dc, min<coord_t>(100, peak_x), y, ((reusableBuffer.spectrumAnalyser.freq - reusableBuffer.spectrumAnalyser.span / 2) + peak_x * (reusableBuffer.spectrumAnalyser.span / 128)) / 1000000, TINSIZE);
       dc->drawText(lcdNextPos, y, "M", TINSIZE);
     }
@@ -67,7 +69,7 @@ RadioSpectrumAnalyser::RadioSpectrumAnalyser(uint8_t moduleIdx) :
 
 void RadioSpectrumAnalyser::buildBody(FormWindow * window)
 {
-  new SpectrumWindow(window, {0, 100, LCD_W, LCD_H - 100});
+  new SpectrumWindow(window, {0, 0, LCD_W, SPECTRUM_HEIGHT});
 }
 
 void RadioSpectrumAnalyser::start()
