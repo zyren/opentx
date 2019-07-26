@@ -543,6 +543,7 @@ class ModuleWindow : public Window {
                                   rfChoice->setFocus();
                               });
       }
+#if defined(MULTIMODULE)
       else if (isModuleMultimodule(moduleIdx)) {
         grid.nextLine();
         new StaticText(this, grid.getLabelSlot(true), STR_RF_PROTOCOL);
@@ -580,6 +581,7 @@ class ModuleWindow : public Window {
                                 });
         }
       }
+#endif
       grid.nextLine();
 
       // Channel Range

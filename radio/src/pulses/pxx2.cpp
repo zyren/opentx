@@ -253,8 +253,8 @@ void Pxx2Pulses::setupAccessBindFrame(uint8_t module)
 
   if (destination->step == BIND_WAIT) {
     if (get_tmr10ms() > destination->timeout) {
-      moduleState[module].mode = MODULE_MODE_NORMAL;
       destination->step = BIND_OK;
+      moduleState[module].mode = MODULE_MODE_NORMAL;
 #if !defined(COLORLCD)
       POPUP_INFORMATION(STR_BIND_OK); // TODO rather use the new callback
 #endif
