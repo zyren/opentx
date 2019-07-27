@@ -487,6 +487,7 @@ class ModuleWindow : public Window {
     void update()
     {
       FormGridLayout grid;
+      grid.setLabelWidth(160);
 
       FormField * previousField = moduleChoice ? moduleChoice->getPreviousField() : moduleChoice->getCurrentField();
       FormField * nextField = lastField ? lastField->getNextField() : nullptr;
@@ -548,14 +549,14 @@ class ModuleWindow : public Window {
         grid.nextLine();
         new StaticText(this, grid.getLabelSlot(true), STR_RF_PROTOCOL);
 
+        // Multi type (CUSTOM, brand A, brand B,...)
         int multiRfProto = g_model.moduleData[moduleIdx].multi.customProto == 1 ? MODULE_SUBTYPE_MULTI_CUSTOM : g_model.moduleData[moduleIdx].getMultiProtocol(false);
-        rfChoice = new Choice(this, grid.getFieldSlot(2, 0), STR_MULTI_PROTOCOLS, MODULE_SUBTYPE_MULTI_FIRST, MODULE_SUBTYPE_MULTI_LAST,
+        rfChoice = new Choice(this, grid.getFieldSlot(3, 0), STR_MULTI_PROTOCOLS, MODULE_SUBTYPE_MULTI_FIRST, MODULE_SUBTYPE_MULTI_LAST,
                               GET_DEFAULT(multiRfProto),
                               [=](int32_t newValue) {
                                 g_model.moduleData[moduleIdx].multi.customProto = (newValue == MODULE_SUBTYPE_MULTI_CUSTOM);
                                 if (!g_model.moduleData[moduleIdx].multi.customProto)
                                   g_model.moduleData[moduleIdx].setMultiProtocol(newValue);
-                                TRACE("Setting : %d", newValue);
                                 g_model.moduleData[moduleIdx].subType = 0;
                                 // Sensible default for DSM2 (same as for ppm): 7ch@22ms + Autodetect settings enabled
                                 if (g_model.moduleData[moduleIdx].getMultiProtocol(true) == MODULE_SUBTYPE_MULTI_DSM2) {
@@ -570,25 +571,37 @@ class ModuleWindow : public Window {
                                 rfChoice->setFocus();
                               });
 
-        if (1) {
-          const mm_protocol_definition * pdef = getMultiProtocolDefinition(
-                  g_model.moduleData[moduleIdx].multi.customProto == 1 ? MODULE_SUBTYPE_MULTI_CUSTOM
-                                                                       : g_model.moduleData[moduleIdx].getMultiProtocol(
-                          false));
-          TRACE("Getting : %d", g_model.moduleData[moduleIdx].getMultiProtocol(false));
-          if (pdef->subTypeString != nullptr) {
-            rfChoice = new Choice(this, grid.getFieldSlot(2, 1), pdef->subTypeString, 0, pdef->maxSubtype,
-                                  GET_DEFAULT(g_model.moduleData[moduleIdx].subType),
-                                  [=](int32_t newValue) {
-                                      g_model.moduleData[moduleIdx].subType = newValue;
-                                      SET_DIRTY();
-                                      update();
-                                      rfChoice->setFocus();
-                                  });
-          }
+        if (g_model.moduleData[moduleIdx].multi.customProto) {
+          // Proto column 1
+          new NumberEdit(this, grid.getFieldSlot(3, 1), 0, 63,
+                         GET_DEFAULT(g_model.moduleData[moduleIdx].getMultiProtocol(false)),
+                         [=](int32_t newValue) {
+                           g_model.moduleData[moduleIdx].setMultiProtocol(newValue);
+                           SET_DIRTY();
+                         });
+
+          // Proto column 2
+          new NumberEdit(this, grid.getFieldSlot(3, 2), 0, 7, GET_SET_DEFAULT(g_model.moduleData[moduleIdx].subType));
         }
         else {
+          // Subtype (D16, DSMX,...)
+          const mm_protocol_definition * pdef = getMultiProtocolDefinition(g_model.moduleData[moduleIdx].getMultiProtocol(false));
+          new Choice(this, grid.getFieldSlot(3, 1), pdef->subTypeString, 0, pdef->maxSubtype,GET_SET_DEFAULT(g_model.moduleData[moduleIdx].subType));
+        }
+        grid.nextLine();
 
+        // Multimodule status
+        new StaticText(this, grid.getLabelSlot(true), STR_MODULE_STATUS);
+        char statusText[64];
+        multiModuleStatus.getStatusString(statusText);
+        new StaticText(this, grid.getFieldSlot(), statusText);
+
+        // Multimodule sync
+        if(multiSyncStatus.isValid()) {
+          grid.nextLine();
+          new StaticText(this, grid.getLabelSlot(true), STR_MODULE_SYNC);
+          multiSyncStatus.getRefreshString(statusText);
+          new StaticText(this, grid.getFieldSlot(), statusText);
         }
       }
 #endif
@@ -622,18 +635,20 @@ class ModuleWindow : public Window {
         grid.nextLine();
       }
 
-      // Model index
-      if (isModuleModelIndexAvailable(moduleIdx)) {
-        new StaticText(this, grid.getLabelSlot(true), STR_RECEIVER_NUM);
-        new NumberEdit(this, grid.getFieldSlot(2, 0), 0, getMaxRxNum(moduleIdx), GET_SET_DEFAULT(g_model.header.modelId[moduleIdx]));
-        grid.nextLine();
-      }
-
       // Module parameters
 
       // Bind and Range buttons
       if (!isModuleRFAccess(moduleIdx) && isModuleBindRangeAvailable(moduleIdx)) {
-        bindButton = new TextButton(this, grid.getFieldSlot(2, 0), STR_MODULE_BIND);
+        uint8_t thirdColumn = 0;
+        new StaticText(this, grid.getLabelSlot(true), STR_RECEIVER);
+
+        // Model index
+        if (isModuleModelIndexAvailable(moduleIdx)) {
+          thirdColumn++;
+          new NumberEdit(this, grid.getFieldSlot(3, 0), 0, getMaxRxNum(moduleIdx), GET_SET_DEFAULT(g_model.header.modelId[moduleIdx]));
+        }
+
+        bindButton = new TextButton(this, grid.getFieldSlot(2+thirdColumn, 0+thirdColumn), STR_MODULE_BIND);
         bindButton->setPressHandler([=]() -> uint8_t {
           if (moduleState[moduleIdx].mode == MODULE_MODE_RANGECHECK) {
             rangeButton->check(false);
@@ -656,7 +671,7 @@ class ModuleWindow : public Window {
           }
         });
 
-        rangeButton = new TextButton(this, grid.getFieldSlot(2, 1), STR_MODULE_RANGE);
+        rangeButton = new TextButton(this, grid.getFieldSlot(2+thirdColumn, 1+thirdColumn), STR_MODULE_RANGE);
         rangeButton->setPressHandler([=]() -> uint8_t {
           if (moduleState[moduleIdx].mode == MODULE_MODE_BIND) {
             bindButton->setText(STR_MODULE_BIND);
