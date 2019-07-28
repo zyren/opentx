@@ -487,7 +487,7 @@ class ModuleWindow : public Window {
     void update()
     {
       FormGridLayout grid;
-      grid.setLabelWidth(160);
+      grid.setLabelWidth(175);
 
       FormField * previousField = moduleChoice ? moduleChoice->getPreviousField() : moduleChoice->getCurrentField();
       FormField * nextField = lastField ? lastField->getNextField() : nullptr;
@@ -551,7 +551,7 @@ class ModuleWindow : public Window {
 
         // Multi type (CUSTOM, brand A, brand B,...)
         int multiRfProto = g_model.moduleData[moduleIdx].multi.customProto == 1 ? MODULE_SUBTYPE_MULTI_CUSTOM : g_model.moduleData[moduleIdx].getMultiProtocol(false);
-        rfChoice = new Choice(this, grid.getFieldSlot(3, 0), STR_MULTI_PROTOCOLS, MODULE_SUBTYPE_MULTI_FIRST, MODULE_SUBTYPE_MULTI_LAST,
+        rfChoice = new Choice(this, grid.getFieldSlot(g_model.moduleData[moduleIdx].multi.customProto ? 3 : 2, 0), STR_MULTI_PROTOCOLS, MODULE_SUBTYPE_MULTI_FIRST, MODULE_SUBTYPE_MULTI_LAST,
                               GET_DEFAULT(multiRfProto),
                               [=](int32_t newValue) {
                                 g_model.moduleData[moduleIdx].multi.customProto = (newValue == MODULE_SUBTYPE_MULTI_CUSTOM);
@@ -586,7 +586,8 @@ class ModuleWindow : public Window {
         else {
           // Subtype (D16, DSMX,...)
           const mm_protocol_definition * pdef = getMultiProtocolDefinition(g_model.moduleData[moduleIdx].getMultiProtocol(false));
-          new Choice(this, grid.getFieldSlot(3, 1), pdef->subTypeString, 0, pdef->maxSubtype,GET_SET_DEFAULT(g_model.moduleData[moduleIdx].subType));
+          if (pdef->maxSubtype > 0)
+            new Choice(this, grid.getFieldSlot(2, 1), pdef->subTypeString, 0, pdef->maxSubtype,GET_SET_DEFAULT(g_model.moduleData[moduleIdx].subType));
         }
         grid.nextLine();
 
@@ -603,6 +604,36 @@ class ModuleWindow : public Window {
           multiSyncStatus.getRefreshString(statusText);
           new StaticText(this, grid.getFieldSlot(), statusText);
         }
+
+        // Multi optional feature row
+        const uint8_t multi_proto = g_model.moduleData[moduleIdx].getMultiProtocol(true);
+        const mm_protocol_definition *pdef = getMultiProtocolDefinition(multi_proto);
+        if (pdef->optionsstr) {
+          grid.nextLine();
+          new StaticText(this, grid.getLabelSlot(true), pdef->optionsstr);
+          if (multi_proto == MODULE_SUBTYPE_MULTI_FS_AFHDS2A) {
+            auto edit = new NumberEdit(this, grid.getFieldSlot(2,0), 50, 400,
+                           GET_DEFAULT(50 + 5 * g_model.moduleData[moduleIdx].multi.optionValue),
+                           SET_VALUE(g_model.moduleData[moduleIdx].multi.optionValue, (newValue- 50) / 5));
+            edit->setStep(5);
+          }
+          else if (multi_proto == MODULE_SUBTYPE_MULTI_OLRS) {
+            new NumberEdit(this, grid.getFieldSlot(2,0), -1, 7, GET_SET_DEFAULT(g_model.moduleData[moduleIdx].multi.optionValue));
+          }
+          else {
+            new NumberEdit(this, grid.getFieldSlot(2,0), -128, 127, GET_SET_DEFAULT(g_model.moduleData[moduleIdx].multi.optionValue));
+          }
+        }
+
+        // Bind on power up
+        grid.nextLine();
+        new StaticText(this, grid.getLabelSlot(true),g_model.moduleData[moduleIdx].getMultiProtocol(true) == MODULE_SUBTYPE_MULTI_DSM2 ? STR_MULTI_DSM_AUTODTECT : STR_MULTI_AUTOBIND);
+        new CheckBox(this, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.moduleData[moduleIdx].multi.autoBindMode));
+
+        // Low power mode
+        grid.nextLine();
+        new StaticText(this, grid.getLabelSlot(true), STR_MULTI_LOWPOWER);
+        new CheckBox(this, grid.getFieldSlot(), GET_SET_DEFAULT(g_model.moduleData[moduleIdx].multi.lowPowerMode));
       }
 #endif
       grid.nextLine();
