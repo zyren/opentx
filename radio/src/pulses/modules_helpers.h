@@ -456,6 +456,9 @@ inline bool isModuleModelIndexAvailable(uint8_t idx)
 
   if (isModuleISRM(idx))
     return true;
+  
+  if(isModuleMultimodule(idx))
+    return true;
 
   return false;
 }
