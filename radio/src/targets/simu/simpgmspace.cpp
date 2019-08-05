@@ -449,12 +449,6 @@ int lcdRestoreBackupBuffer()
   memcpy(displayBuf, simuLcdBackupBuf, sizeof(displayBuf));
   return 1;
 }
-//
-//uint32_t pwrCheck()
-//{
-//  // TODO: ability to simulate shutdown warning for a "soft" simulator restart
-//  return simu_shutdown ? e_power_off : e_power_on;
-//}
 
 void pwrOff()
 {
@@ -462,14 +456,7 @@ void pwrOff()
 
 uint32_t pwrPressed()
 {
-  // TODO: simulate power button
-#if defined(PWR_SWITCH_GPIO)  // STM32
-  return false;
-#elif defined(PIO_PC17)       // AT91SAM3
-  return PIOC->PIO_PDSR & PIO_PC17;
-#else
-  return false;
-#endif
+  return simu_shutdown ? false : true;
 }
 
 void pwrInit()

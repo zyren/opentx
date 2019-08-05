@@ -147,6 +147,8 @@ OpenTxSim::OpenTxSim(FXApp* a):
 
 OpenTxSim::~OpenTxSim()
 {
+  TRACE("OpenTxSim::~OpenTxSim()");
+
   StopSimu();
   StopAudioThread();
 

@@ -2024,7 +2024,7 @@ int main()
   tasksStart();
 }
 
-#if defined(PWR_BUTTON_PRESS)
+#if defined(PWR_BUTTON_PRESS) && !defined(SIMU)
 uint32_t pwr_press_time = 0;
 
 uint32_t pwrPressedDuration()
