@@ -148,7 +148,7 @@ if(MODULE_SIZE_STD)
 endif()
 
 if(MULTIMODULE STREQUAL INTERNAL)
-  add_definitions(-DINTERNAL_MULTIMODULE)
+  add_definitions(-DINTERNAL_MODULE_MULTI)
 endif()
 
 if(MULTIMODULE)

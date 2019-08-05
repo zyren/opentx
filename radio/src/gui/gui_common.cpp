@@ -569,7 +569,7 @@ bool isInternalModuleAvailable(int moduleType)
 #endif
 #endif
 
-#if defined(INTERNAL_MULTIMODULE)
+#if defined(INTERNAL_MODULE_MULTI)
   if (moduleType == MODULE_TYPE_MULTIMODULE)
     return !isModuleUsingSport(EXTERNAL_MODULE, g_model.moduleData[EXTERNAL_MODULE].type);
 #endif
