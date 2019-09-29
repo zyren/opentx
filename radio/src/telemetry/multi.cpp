@@ -214,43 +214,63 @@ static void processMultiTelemetryPaket(const uint8_t * packet, uint8_t module)
     case SpektrumTelemetry:
       // processSpektrumPacket expects data[0] to be the telemetry indicator 0xAA but does not check it,
       // just send one byte of our header instead
-      if (len >= 17)
+      if (len >= 17) {
+        //TODO:
+        // - pass module index (patch instance in fct)
         processSpektrumPacket(data - 1);
+      }
       else
         TRACE("[MP] Received spektrum telemetry len %d < 17", len);
       break;
 
     case FlyskyIBusTelemetry:
-      if (len >= 28)
+      if (len >= 28) {
+        //TODO:
+        // - pass module index (patch instance in fct)
         processFlySkyPacket(data);
+      }
       else
         TRACE("[MP] Received IBUS telemetry len %d < 28", len);
       break;
 
     case FlyskyIBusTelemetryAC:
-      if (len >= 28)
+      if (len >= 28) {
+        //TODO:
+        // - pass module index (patch instance in fct)
         processFlySkyPacketAC(data);
+      }
       else
         TRACE("[MP] Received IBUS telemetry AC len %d < 28", len);
       break;
 
     case HitecTelemetry:
-      if (len >= 8)
+      if (len >= 8) {
+        //TODO:
+        // - pass module index (patch instance in fct)
         processHitecPacket(data);
+      }
       else
         TRACE("[MP] Received Hitec telemetry len %d < 8", len);
       break;
 
     case FrSkyHubTelemetry:
-      if (len >= 4)
+      if (len >= 4) {
+        //TODO:
+        // - pass module index (patch instance in fct)
         frskyDProcessPacket(data);
+      }
       else
         TRACE("[MP] Received Frsky HUB telemetry len %d < 4", len);
       break;
 
     case FrSkySportTelemtry:
-      if (len >= 4)
+      if (len >= 4) {
+        //TODO:
+        // - check CRC (checkSportPacket)
+        // - patch instance ID (insert module ID)
+        // - sportProcessTelemetryPacketWithoutCrc(module, packet);
         sportProcessTelemetryPacket(data);
+      }
       else
         TRACE("[MP] Received sport telemetry len %d < 4", len);
       break;
