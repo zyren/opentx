@@ -162,23 +162,13 @@ void sportProcessTelemetryPacketWithoutCrc(uint8_t origin, const uint8_t * packe
 #endif
 
   if (primId == DATA_FRAME) {
-    uint8_t originMask;
-    if (origin == TELEMETRY_ENDPOINT_SPORT) {
-      originMask = 0x04;
-    }
-    else {
-      uint8_t moduleIndex = (origin >> 2);
-      originMask = 0x01 << moduleIndex;
-    }
     uint8_t instance = physicalId + (origin << 5);
     if (dataId == RSSI_ID) {
       data = SPORT_DATA_U8(packet);
-      if (data > 0) {
-        telemetryStreaming = TELEMETRY_TIMEOUT10ms; // reset counter only if valid packets are being detected
-        telemetryData.telemetryValid |= originMask;
-      }
+      if (data > 0)
+        setTelemetry(origin);
       else {
-        telemetryData.telemetryValid &= ~originMask;
+        clearTelemetry(origin);
         // one module may send RSSI(0) while the other is still streaming
         // in this case we don't want to update telemetryData.rssi
         return;
@@ -210,7 +200,7 @@ void sportProcessTelemetryPacketWithoutCrc(uint8_t origin, const uint8_t * packe
     }
 
     // here we discard the frame if it comes from an origin which has RSSI = 0 (RxBt and RSSI are sent in a loop by the module in some situations)
-    if (TELEMETRY_STREAMING() && (telemetryData.telemetryValid & originMask)/* because when Rx is OFF it happens that some old A1/A2 values are sent from the XJT module*/) {
+    if (TELEMETRY_STREAMING() && isTelemetryValid(origin)/* because when Rx is OFF it happens that some old A1/A2 values are sent from the XJT module*/) {
       if ((dataId >> 8) == 0) {
         // The old FrSky IDs
         processHubPacket(dataId, HUB_DATA_U16(packet));

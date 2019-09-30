@@ -32,9 +32,52 @@
 
 extern uint8_t telemetryStreaming; // >0 (true) == data is streaming in. 0 = no data detected for some time
 
+constexpr uint8_t TELEMETRY_TIMEOUT10ms = 100; // 1 second
+
 inline bool TELEMETRY_STREAMING()
 {
   return telemetryStreaming > 0;
+}
+
+inline void setTelemetry(uint8_t origin)
+{
+  telemetryStreaming = TELEMETRY_TIMEOUT10ms;
+
+  if (origin == TELEMETRY_ENDPOINT_SPORT) {
+    telemetryData.telemetryValid |= 0x04;
+    return;
+  }
+
+  uint8_t moduleIdx = (origin >> 2);
+  uint8_t originMask = 0x01 << moduleIdx;
+
+  telemetryData.telemetryValid |= originMask;
+  return;
+}
+
+inline void clearTelemetry(uint8_t origin)
+{
+  if (origin == TELEMETRY_ENDPOINT_SPORT) {
+    telemetryData.telemetryValid &= ~(0x04);
+    return;
+  }
+
+  uint8_t moduleIdx = (origin >> 2);
+  uint8_t originMask = 0x01 << moduleIdx;
+
+  telemetryData.telemetryValid &= ~originMask;
+  return;
+}
+
+inline bool isTelemetryValid(uint8_t origin)
+{
+  if (origin == TELEMETRY_ENDPOINT_SPORT)
+    return telemetryData.telemetryValid & 0x04;
+
+  uint8_t moduleIdx = (origin >> 2);
+  uint8_t originMask = 0x01 << moduleIdx;
+
+  return telemetryData.telemetryValid & originMask;
 }
 
 enum TelemetryStates {
@@ -43,8 +86,6 @@ enum TelemetryStates {
   TELEMETRY_KO
 };
 extern uint8_t telemetryState;
-
-constexpr uint8_t TELEMETRY_TIMEOUT10ms = 100; // 1 second
 
 #define TELEMETRY_SERIAL_DEFAULT       0
 #define TELEMETRY_SERIAL_8E2           1

@@ -217,7 +217,7 @@ static void processMultiTelemetryPaket(const uint8_t * packet, uint8_t module)
       if (len >= 17) {
         //TODO:
         // - pass module index (patch instance in fct)
-        processSpektrumPacket(data - 1);
+        processSpektrumPacket(module, data - 1);
       }
       else
         TRACE("[MP] Received spektrum telemetry len %d < 17", len);
@@ -227,7 +227,7 @@ static void processMultiTelemetryPaket(const uint8_t * packet, uint8_t module)
       if (len >= 28) {
         //TODO:
         // - pass module index (patch instance in fct)
-        processFlySkyPacket(data);
+        processFlySkyPacket(module, data);
       }
       else
         TRACE("[MP] Received IBUS telemetry len %d < 28", len);
@@ -237,7 +237,7 @@ static void processMultiTelemetryPaket(const uint8_t * packet, uint8_t module)
       if (len >= 28) {
         //TODO:
         // - pass module index (patch instance in fct)
-        processFlySkyPacketAC(data);
+        processFlySkyPacketAC(module, data);
       }
       else
         TRACE("[MP] Received IBUS telemetry AC len %d < 28", len);
@@ -247,7 +247,7 @@ static void processMultiTelemetryPaket(const uint8_t * packet, uint8_t module)
       if (len >= 8) {
         //TODO:
         // - pass module index (patch instance in fct)
-        processHitecPacket(data);
+        processHitecPacket(module, data);
       }
       else
         TRACE("[MP] Received Hitec telemetry len %d < 8", len);
@@ -257,22 +257,24 @@ static void processMultiTelemetryPaket(const uint8_t * packet, uint8_t module)
       if (len >= 4) {
         //TODO:
         // - pass module index (patch instance in fct)
-        frskyDProcessPacket(data);
+        frskyDProcessPacket(module, data);
       }
       else
         TRACE("[MP] Received Frsky HUB telemetry len %d < 4", len);
       break;
 
     case FrSkySportTelemtry:
-      if (len >= 4) {
-        //TODO:
-        // - check CRC (checkSportPacket)
-        // - patch instance ID (insert module ID)
-        // - sportProcessTelemetryPacketWithoutCrc(module, packet);
-        sportProcessTelemetryPacket(data);
+      if (len >= FRSKY_SPORT_PACKET_SIZE) {
+        if (!checkSportPacket(data)) {
+          TRACE("[MP] frsky sport checksum error");
+          break;
+        }
+        else {
+          sportProcessTelemetryPacketWithoutCrc((module << 2), data);
+        }
       }
       else
-        TRACE("[MP] Received sport telemetry len %d < 4", len);
+        TRACE("[MP] Received sport telemetry len %d < FRSKY_SPORT_PACKET_SIZE", len);
       break;
 
     case InputSync:

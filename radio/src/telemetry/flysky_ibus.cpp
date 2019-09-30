@@ -140,11 +140,11 @@ const FlySkySensor flySkySensors[] = {
 
 int32_t getALT(uint32_t value);
 
-static void processFlySkySensor(const uint8_t * packet, uint8_t type)
+static void processFlySkySensor(uint8_t origin, const uint8_t * packet, uint8_t type)
 {
   uint8_t buffer[8];
   uint16_t id = packet[0];
-  const uint8_t instance = packet[1];
+  const uint8_t instance = packet[1] | (origin << 5);
   int32_t value;
 
   //Load most likely value
@@ -161,7 +161,7 @@ static void processFlySkySensor(const uint8_t * packet, uint8_t type)
   else if (id == AFHDS2A_ID_RX_ERR_RATE) {
     value = 100 - value;
     telemetryData.rssi.set(value);
-    if (value > 0) telemetryStreaming = TELEMETRY_TIMEOUT10ms;
+    if (value > 0) setTelemetry(origin);
   }
   else if (id == AFHDS2A_ID_PRES && value) {
     // Extract temperature to a new sensor
@@ -185,7 +185,7 @@ static void processFlySkySensor(const uint8_t * packet, uint8_t type)
       buffer[1] = instance;
       buffer[2] = 4;
       memcpy(buffer + 3, packet + index, 4);
-      processFlySkySensor(buffer, 0xAC);
+      processFlySkySensor(origin, buffer, 0xAC);
     }
     return;
   }
@@ -197,7 +197,7 @@ static void processFlySkySensor(const uint8_t * packet, uint8_t type)
       buffer[1] = instance;
       buffer[2] = packet[index];
       buffer[3] = packet[index + 1];
-      processFlySkySensor(buffer, 0xAA);
+      processFlySkySensor(origin, buffer, 0xAA);
     }
     return;
   }
@@ -209,7 +209,7 @@ static void processFlySkySensor(const uint8_t * packet, uint8_t type)
       buffer[1] = instance;
       buffer[2] = packet[index];
       buffer[3] = packet[index + 1];
-      processFlySkySensor(buffer, 0xAA);
+      processFlySkySensor(origin, buffer, 0xAA);
     }
     return;
   }
@@ -224,10 +224,12 @@ static void processFlySkySensor(const uint8_t * packet, uint8_t type)
   setTelemetryValue(PROTOCOL_TELEMETRY_FLYSKY_IBUS, id, 0, instance, value, UNIT_RAW, 0);
 }
 
-void processFlySkyPacket(const uint8_t * packet)
+void processFlySkyPacket(uint8_t module, const uint8_t * packet)
 {
+  uint8_t origin = (module << 2);
+  
   // Set TX RSSI Value, reverse MULTIs scaling
-  setTelemetryValue(PROTOCOL_TELEMETRY_FLYSKY_IBUS, TX_RSSI_ID, 0, 0, packet[0], UNIT_RAW, 0);
+  setTelemetryValue(PROTOCOL_TELEMETRY_FLYSKY_IBUS, TX_RSSI_ID, 0, (origin << 5), packet[0], UNIT_RAW, 0);
 
   const uint8_t * buffer = packet + 1;
   int sesnor = 0;
@@ -238,7 +240,7 @@ void processFlySkyPacket(const uint8_t * packet)
   }
 }
 
-void processFlySkyPacketAC(const uint8_t * packet)
+void processFlySkyPacketAC(uint8_t module, const uint8_t * packet)
 {
   // Set TX RSSI Value, reverse MULTIs scaling
   setTelemetryValue(PROTOCOL_TELEMETRY_FLYSKY_IBUS, TX_RSSI_ID, 0, 0, packet[0], UNIT_RAW, 0);

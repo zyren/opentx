@@ -72,6 +72,7 @@ void processCrossfireTelemetryValue(uint8_t index, int32_t value)
     return;
 
   const CrossfireSensor & sensor = crossfireSensors[index];
+  //rco: subId used instead of instance???
   setTelemetryValue(PROTOCOL_TELEMETRY_CROSSFIRE, sensor.id, 0, sensor.subId, value, sensor.unit, sensor.precision);
 }
 

@@ -269,12 +269,13 @@ bool isSpektrumValidValue(int32_t value, const SpektrumDataType type)
   }
 }
 
-void processSpektrumPacket(const uint8_t *packet)
+void processSpektrumPacket(uint8_t module, const uint8_t *packet)
 {
-  setTelemetryValue(PROTOCOL_TELEMETRY_SPEKTRUM, (I2C_PSEUDO_TX << 8) + 0, 0, 0, packet[1], UNIT_RAW, 0);
+  uint8_t origin = (module << 2);
+  setTelemetryValue(PROTOCOL_TELEMETRY_SPEKTRUM, (I2C_PSEUDO_TX << 8) + 0, 0, (origin << 5), packet[1], UNIT_RAW, 0);
   // highest bit indicates that TM1100 is in use, ignore it
   uint8_t i2cAddress = (packet[2] & 0x7f);
-  uint8_t instance = packet[3];
+  uint8_t instance = packet[3] | (origin << 5);
 
   if (i2cAddress == I2C_TEXTGEN) {
     uint8_t lineNumber = packet[4];
@@ -287,8 +288,6 @@ void processSpektrumPacket(const uint8_t *packet)
     }
     // Set a sential \0 just for safety since we have the space there
     setTelemetryValue(PROTOCOL_TELEMETRY_SPEKTRUM, pseudoId, 0, instance, '\0', UNIT_TEXT, 13);
-
-
     return;
   }
 
@@ -331,7 +330,7 @@ void processSpektrumPacket(const uint8_t *packet)
           // Range is 0-31, multiply by 3 to get an almost full reading for 0x1f, the maximum the cyrf chip reports
           telemetryData.rssi.set(packet[1] * 3);
         }
-        telemetryStreaming = TELEMETRY_TIMEOUT10ms;
+        setTelemetry(origin);
       }
 
       uint16_t pseudoId = (sensor->i2caddress << 8 | sensor->startByte);
@@ -436,7 +435,7 @@ void processSpektrumTelemetryData(uint8_t module, uint8_t data, uint8_t* rxBuffe
     }
     debugPrintf("\r\n");
 #endif
-    processSpektrumPacket(rxBuffer);
+    processSpektrumPacket(module, rxBuffer);
     rxBufferCount = 0;
   }
 }
