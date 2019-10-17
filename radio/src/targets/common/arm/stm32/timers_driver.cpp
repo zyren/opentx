@@ -75,5 +75,5 @@ extern "C" void INTERRUPT_xMS_IRQHandler()
 {
   INTERRUPT_xMS_TIMER->SR &= ~TIM_SR_UIF;
   interrupt5ms();
-  DEBUG_INTERRUPT(INT_1MS);
+  DEBUG_INTERRUPT(INT_5MS);
 }
