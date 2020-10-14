@@ -1260,7 +1260,6 @@ bool menuModelSetup(event_t event)
       }
 #endif
 
-
       case ITEM_MODEL_SETUP_TRAINER_LABEL:
         lcdDrawText(MENUS_MARGIN_LEFT, y, STR_TRAINER);
         break;
