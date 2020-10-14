@@ -47,7 +47,8 @@ void Pxx2Pulses::addFlag1(uint8_t module)
   else {
     subType = g_model.moduleData[module].subType;
   }
-  Pxx2Transport::addByte(subType << 4);
+
+  Pxx2Transport::addByte(subType << 4 | moduleState[module].racingMode << 3);
 }
 
 void Pxx2Pulses::addPulsesValues(uint16_t low, uint16_t high)

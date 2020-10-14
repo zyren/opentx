@@ -46,6 +46,7 @@
 
 #define PXX2_CHANNELS_FLAG0_FAILSAFE         (1 << 6)
 #define PXX2_CHANNELS_FLAG0_RANGECHECK       (1 << 7)
+#define PXX2_CHANNELS_FLAG1_RACING_MODE      (1 << 3)
 
 #define PXX2_RX_SETTINGS_FLAG0_WRITE               (1 << 6)
 
