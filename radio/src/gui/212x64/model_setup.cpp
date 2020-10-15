@@ -1102,10 +1102,10 @@ void menuModelSetup(event_t event)
 
       case ITEM_MODEL_SETUP_INTERNAL_MODULE_RACING_MODE:
       {
-        uint8_t moduleIdx = CURRENT_MODULE_EDITED(k);
-        ModuleData & moduleData = g_model.moduleData[moduleIdx];
-        lcdDrawTextAlignedLeft(y, "RacingMode");
-        moduleState[moduleIdx].racingMode = editCheckBox(moduleState[moduleIdx].racingMode, MODEL_SETUP_2ND_COLUMN, y, "", attr, event);
+        // uint8_t moduleIdx = CURRENT_MODULE_EDITED(k);
+        ModuleData & moduleData = g_model.moduleData[INTERNAL_MODULE];
+        lcdDrawTextAlignedLeft(y, STR_RACING_MODE);
+        moduleData.pxx2.enableRacingMode = editCheckBox(moduleData.pxx2.enableRacingMode, MODEL_SETUP_2ND_COLUMN, y, "", attr, event);
         break;
       }
 

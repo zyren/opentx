@@ -374,6 +374,15 @@ void evalFunctions(const CustomFunctionData * functions, CustomFunctionsContext 
             }
             break;
 
+          case FUNC_RACING_MODE:
+            if(g_model.moduleData[INTERNAL_MODULE].pxx2.enableRacingMode) {
+              moduleState[INTERNAL_MODULE].racingMode = 1;
+              showMessageBox("RACING MODE");
+            }
+            else
+              moduleState[INTERNAL_MODULE].racingMode = 0;
+            break;
+
 #if defined(DEBUG)
           case FUNC_TEST:
             testFunc();
@@ -400,6 +409,13 @@ void evalFunctions(const CustomFunctionData * functions, CustomFunctionsContext 
           }
         }
 #endif
+        switch(CFN_FUNC(cfn)) {
+          case FUNC_RACING_MODE:
+          {
+            moduleState[INTERNAL_MODULE].racingMode = 0;
+            break;
+          }
+        }
       }
     }
   }

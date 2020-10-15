@@ -237,9 +237,10 @@
 #endif
 
 #define TR_SF_SCREENSHOT               "Photo Ecran\0 "
+#define TR_SF_RACING_MODE              "RacingMode\0"
 #define TR_SF_RESERVE                  "[reserve]\0   "
 
-  #define TR_VFSWFUNC                  TR_SF_SAFETY "Ecolage\0     ""Trim instant.""Remise à 0\0  ""Déf.\0        " TR_ADJUST_GVAR "Volume\0      " "DéfFailsafe\0 " "Test Port.\0  " "Bind\0        " TR_SOUND TR_PLAY_TRACK TR_PLAY_VALUE TR_SF_RESERVE TR_SF_PLAY_SCRIPT TR_SF_RESERVE TR_SF_BG_MUSIC TR_VVARIO TR_HAPTIC TR_SDCLOGS "Rétroécl.\0   " TR_SF_SCREENSHOT TR_SF_TEST
+  #define TR_VFSWFUNC                  TR_SF_SAFETY "Ecolage\0     ""Trim instant.""Remise à 0\0  ""Déf.\0        " TR_ADJUST_GVAR "Volume\0      " "DéfFailsafe\0 " "Test Port.\0  " "Bind\0        " TR_SOUND TR_PLAY_TRACK TR_PLAY_VALUE TR_SF_RESERVE TR_SF_PLAY_SCRIPT TR_SF_RESERVE TR_SF_BG_MUSIC TR_VVARIO TR_HAPTIC TR_SDCLOGS "Rétroécl.\0   " TR_SF_SCREENSHOT TR_SF_RACING_MODE TR_SF_TEST
 
 #define LEN_VFSWRESET                  TR("\004", "\012")
 
@@ -962,6 +963,7 @@
 #define TR_UNIT                        "Unité"
 #define TR_TELEMETRY_NEWSENSOR         TR(INDENT"Nouveau capteur...", INDENT "Ajout d'un nouveau capteur...")
 #define TR_CHANNELRANGE                TR(INDENT "Canaux", INDENT "Plage de canaux")
+#define TR_RACING_MODE                 INDENT "RacingMode"
 #define TR_AFHDS3_RX_FREQ              TR("RX freq.", "RX frequency")
 #define TR_AFHDS3_ONE_TO_ONE_TELEMETRY TR("Unicast/Tel.", "Unicast/Telemetry")
 #define TR_AFHDS3_ONE_TO_MANY          "Multicast"

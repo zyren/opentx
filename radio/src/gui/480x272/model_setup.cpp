@@ -1253,9 +1253,9 @@ bool menuModelSetup(event_t event)
 #if defined(HARDWARE_INTERNAL_MODULE)
       case ITEM_MODEL_SETUP_INTERNAL_MODULE_RACING_MODE:
       {
-        ModuleData & moduleData = g_model.moduleData[moduleIdx];
-        lcdDrawText(MENUS_MARGIN_LEFT, y, "RacingMode");
-        moduleState[moduleIdx].racingMode = editCheckBox(moduleState[moduleIdx].racingMode, MODEL_SETUP_2ND_COLUMN, y, "", attr, event);
+        ModuleData & moduleData = g_model.moduleData[INTERNAL_MODULE];
+        lcdDrawText(MENUS_MARGIN_LEFT, y, STR_RACING_MODE);
+        moduleData.pxx2.enableRacingMode = editCheckBox(moduleData.pxx2.enableRacingMode, MODEL_SETUP_2ND_COLUMN, y, "", attr, event);
         break;
       }
 #endif
