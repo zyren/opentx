@@ -193,6 +193,7 @@ inline uint8_t IF_ALLOW_RACING_MODE(int moduleIdx)
     if (0 == g_model.moduleData[moduleIdx].channelsCount)
       return 1;
   }
+  g_model.moduleData[moduleIdx].pxx2.enableRacingMode = 0;
   return HIDDEN_ROW;
 }
 
