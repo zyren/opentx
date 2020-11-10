@@ -50,7 +50,7 @@ void Pxx2Pulses::addFlag1(uint8_t module)
 
   uint8_t flag1 = subType << 4u;
   if (isFunctionActive(FUNCTION_RACING_MODE)) {
-    flag1 |= 1u << 3u;
+    flag1 |= PXX2_CHANNELS_FLAG1_RACING_MODE;
   }
 
   Pxx2Transport::addByte(flag1);
