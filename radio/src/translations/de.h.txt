@@ -234,7 +234,7 @@
 #endif
 
 #define TR_SF_SCREENSHOT    			"Screenshot"
-#define TR_SF_RACING_MODE         "RacingMode\0"
+#define TR_SF_RACING_MODE               "RacingMode"
 #define TR_SF_RESERVE        			"[Reserve]\0"
 
 #define TR_VFSWFUNC         			 TR_SF_SAFETY "Lehrer \0  ""Inst. Trim""Rücksetz.\0""Setze \0   " TR_ADJUST_GVAR "Lautstr.\0 " "SetFailsfe" "RangeCheck" "ModuleBind" TR_SOUND TR_PLAY_TRACK TR_PLAY_VALUE TR_SF_RESERVE TR_SF_PLAY_SCRIPT TR_SF_RESERVE TR_SF_BG_MUSIC TR_VVARIO TR_HAPTIC TR_SDCLOGS "LCD Licht\0" TR_SF_SCREENSHOT TR_SF_RACING_MODE TR_SF_TEST
@@ -948,7 +948,6 @@
 #define TR_UNIT                			"Einheit"
 #define TR_TELEMETRY_NEWSENSOR          INDENT "Sensor hinzufügen ..."
 #define TR_CHANNELRANGE        			TR(INDENT "Kanäle", INDENT "Ausgangs Kanäle")  //wg 9XR-Pro
-#define TR_RACING_MODE                 INDENT "RacingMode"
 #define TR_AFHDS3_RX_FREQ              TR("RX freq.", "RX frequency")
 #define TR_AFHDS3_ONE_TO_ONE_TELEMETRY TR("Unicast/Tel.", "Unicast/Telemetry")
 #define TR_AFHDS3_ONE_TO_MANY          "Multicast"
