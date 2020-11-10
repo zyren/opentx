@@ -49,7 +49,6 @@ enum {
   ITEM_RECEIVER_SETTINGS_TELEMETRY_25MW,
   ITEM_RECEIVER_SETTINGS_SPORT_FPORT,
   ITEM_RECEIVER_SETTINGS_FPORT2,
-  ITEM_RECEIVER_SETTINGS_ENBALE_RACING_MODE,
   ITEM_RECEIVER_SETTINGS_CAPABILITY_NOT_SUPPORTED1,
   ITEM_RECEIVER_SETTINGS_CAPABILITY_NOT_SUPPORTED2,
   ITEM_RECEIVER_SETTINGS_PINMAP_FIRST
@@ -85,7 +84,6 @@ void menuModelReceiverOptions(event_t event)
     IF_RECEIVER_CAPABILITY(RECEIVER_CAPABILITY_TELEMETRY_25MW, 0),
     IF_RECEIVER_CAPABILITY(RECEIVER_CAPABILITY_FPORT, 0),
     IF_RECEIVER_CAPABILITY(RECEIVER_CAPABILITY_FPORT2, 0),
-    IF_ALLOW_RACING_MODE(g_moduleIdx, IS_RECEIVER_CAPABILITY_ENABLED(RECEIVER_CAPABILITY_RACING_MODE)),
     uint8_t(reusableBuffer.hardwareAndSettings.modules[g_moduleIdx].receivers[receiverId].information.capabilityNotSupported ? READONLY_ROW : HIDDEN_ROW),
     uint8_t(reusableBuffer.hardwareAndSettings.modules[g_moduleIdx].receivers[receiverId].information.capabilityNotSupported ? READONLY_ROW : HIDDEN_ROW),
     0 // channels ...
@@ -181,14 +179,6 @@ void menuModelReceiverOptions(event_t event)
             reusableBuffer.hardwareAndSettings.receiverSettings.dirty = RECEIVER_SETTINGS_DIRTY;
           }
           break;
-
-        case ITEM_RECEIVER_SETTINGS_ENBALE_RACING_MODE:
-        {
-          ModuleData & moduleData = g_model.moduleData[g_moduleIdx];
-          lcdDrawTextAlignedLeft(y, "Racing Mode");
-          moduleData.pxx2.enableRacingMode = editCheckBox(moduleData.pxx2.enableRacingMode, RECEIVER_OPTIONS_2ND_COLUMN, y, "Racing Mode", attr, event);
-          break;
-        }
 
         case ITEM_RECEIVER_SETTINGS_CAPABILITY_NOT_SUPPORTED1:
           lcdDrawText(LCD_W/2, y+1, STR_MORE_OPTIONS_AVAILABLE, SMLSIZE|CENTERED);

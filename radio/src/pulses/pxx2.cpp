@@ -48,14 +48,19 @@ void Pxx2Pulses::addFlag1(uint8_t module)
     subType = g_model.moduleData[module].subType;
   }
 
-  Pxx2Transport::addByte(subType << 4 | moduleState[module].racingMode << 3);
+  uint8_t flag1 = subType << 4u;
+  if (isFunctionActive(FUNCTION_RACING_MODE)) {
+    flag1 |= 1u << 3u;
+  }
+
+  Pxx2Transport::addByte(flag1);
 }
 
 void Pxx2Pulses::addPulsesValues(uint16_t low, uint16_t high)
 {
   Pxx2Transport::addByte(low); // Low byte of channel
-  Pxx2Transport::addByte(((low >> 8) & 0x0F) | (high << 4));  // 4 bits each from 2 channels
-  Pxx2Transport::addByte(high >> 4);  // High byte of channel
+  Pxx2Transport::addByte(((low >> 8u) & 0x0Fu) | (high << 4u));  // 4 bits each from 2 channels
+  Pxx2Transport::addByte(high >> 4u);  // High byte of channel
 }
 
 void Pxx2Pulses::addChannels(uint8_t module)

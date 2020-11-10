@@ -370,17 +370,14 @@ void evalFunctions(const CustomFunctionData * functions, CustomFunctionsContext 
 
           case FUNC_SCREENSHOT:
             if (!(functionsContext.activeSwitches & switch_mask)) {
-              mainRequestFlags |= (1 << REQUEST_SCREENSHOT);
+              mainRequestFlags |= (1u << REQUEST_SCREENSHOT);
             }
             break;
 
           case FUNC_RACING_MODE:
-            if(g_model.moduleData[INTERNAL_MODULE].pxx2.enableRacingMode) {
-              moduleState[INTERNAL_MODULE].racingMode = 1;
-              showMessageBox("RACING MODE");
+            if (isRacingModeAllowed()) {
+              newActiveFunctions |= (1u << FUNCTION_RACING_MODE);
             }
-            else
-              moduleState[INTERNAL_MODULE].racingMode = 0;
             break;
 
 #if defined(DEBUG)
@@ -409,13 +406,6 @@ void evalFunctions(const CustomFunctionData * functions, CustomFunctionsContext 
           }
         }
 #endif
-        switch(CFN_FUNC(cfn)) {
-          case FUNC_RACING_MODE:
-          {
-            moduleState[INTERNAL_MODULE].racingMode = 0;
-            break;
-          }
-        }
       }
     }
   }

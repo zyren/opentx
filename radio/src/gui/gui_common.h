@@ -184,26 +184,12 @@ inline uint8_t MODULE_CHANNELS_ROWS(int moduleIdx)
   }
 }
 
-inline uint8_t IF_ALLOW_RACING_MODE(int moduleIdx, uint8_t flag)
+inline bool isRacingModeAllowed()
 {
-  static uint8_t unenableCount = 0;
-  if (flag && moduleIdx==INTERNAL_MODULE) {
-    if (!IS_MODULE_ENABLED(moduleIdx)) {
-      return HIDDEN_ROW;
-    }
-    else if (isModulePXX2(moduleIdx)) {
-      if (0 == g_model.moduleData[moduleIdx].channelsCount)
-        return 1;
-    }
-    g_model.moduleData[moduleIdx].pxx2.enableRacingMode = 0;
-    return HIDDEN_ROW;
-  }
-  else {
-    if (unenableCount > 5)
-      g_model.moduleData[moduleIdx].pxx2.enableRacingMode = 0;
-    unenableCount++;
-    return HIDDEN_ROW;
-  }
+  if (isModulePXX2(INTERNAL_MODULE) && 0 == g_model.moduleData[INTERNAL_MODULE].channelsCount)
+    return true;
+  else
+    return false;
 }
 
 #if defined(MULTIMODULE)
